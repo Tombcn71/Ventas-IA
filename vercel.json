@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run db:migrate && next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"]
+}
+
