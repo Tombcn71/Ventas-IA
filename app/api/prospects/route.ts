@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     let prospects
     
     if (city) {
-      prospects = await sql`SELECT * FROM venues WHERE city = ${city} ORDER BY rating DESC, created_at DESC LIMIT 100`
+      prospects = await sql`SELECT * FROM venues WHERE city = ${city} ORDER BY rating DESC, "createdAt" DESC LIMIT 100`
     } else {
-      prospects = await sql`SELECT * FROM venues ORDER BY rating DESC, created_at DESC LIMIT 100`
+      prospects = await sql`SELECT * FROM venues ORDER BY rating DESC, "createdAt" DESC LIMIT 100`
     }
 
     // Ensure prospects is an array
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
             city: prospect.city,
             latitude: prospect.latitude,
             longitude: prospect.longitude,
-            phoneNumber: prospect.phone,
+            phoneNumber: prospect.phoneNumber,
             website: prospect.website,
             businessType: prospect.venue_type,
             rating: prospect.rating,

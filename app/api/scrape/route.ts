@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
           INSERT INTO venues (
             id, name, address, city, 
             latitude, longitude, venue_type,
-            rating, price_level, phone, website, status, created_at
+            rating, price_level, "phoneNumber", website, status, "createdAt"
           )
           VALUES (
             ${venueId},
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             'new',
             NOW()
           )
-          ON CONFLICT DO NOTHING
+          ON CONFLICT (name, city) DO NOTHING
         `
         saved++
       } catch (err) {
