@@ -16,7 +16,13 @@ interface MenuAnalysisResult {
 export async function analyzeMenuPhoto(photoUrl: string, brandsToLookFor: string[]): Promise<MenuAnalysisResult> {
   try {
     // Step 1: Vision AI extracts text
-    const visionClient = new ImageAnnotatorClient()
+    let clientConfig = {}
+    if (process.env.GOOGLE_VISION_CREDENTIALS_BASE64) {
+      const credentials = JSON.parse(Buffer.from(process.env.GOOGLE_VISION_CREDENTIALS_BASE64, 'base64').toString())
+      clientConfig = { credentials }
+    }
+    
+    const visionClient = new ImageAnnotatorClient(clientConfig)
     const [result] = await visionClient.textDetection(photoUrl)
     const menuText = result.textAnnotations?.[0]?.description || ''
     
