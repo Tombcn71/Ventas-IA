@@ -303,3 +303,4 @@ A: Ja, update `seed-barcelona.ts` met meer areas array entries.
 
 **¡Buena suerte! 🚀**
 
+

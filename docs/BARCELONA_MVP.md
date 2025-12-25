@@ -204,3 +204,4 @@ npm run seed:barcelona
 - [Places API Pricing](https://developers.google.com/maps/billing-and-pricing/pricing#places-details)
 - [Vision API Pricing](https://cloud.google.com/vision/pricing)
 
+

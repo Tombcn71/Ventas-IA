@@ -407,3 +407,4 @@ Need help? Check:
 
 **Ready to start?** Run `npm run seed:barcelona` and let's go! 🚀
 
+

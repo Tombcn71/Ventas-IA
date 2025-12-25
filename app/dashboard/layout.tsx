@@ -13,7 +13,6 @@ import {
   Store,
   Package,
 } from 'lucide-react'
-import { UserButton } from '@neondatabase/neon-js/auth/react/ui'
 
 export default function DashboardLayout({
   children,
@@ -69,10 +68,7 @@ export default function DashboardLayout({
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 space-y-2">
-          <div className="px-4">
-            <UserButton />
-          </div>
+        <div className="p-4 border-t border-gray-200">
           <Link
             href="/"
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition"

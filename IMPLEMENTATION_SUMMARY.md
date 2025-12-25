@@ -474,3 +474,4 @@ Barcelona (50 venues):
 
 **Next Step**: Run `npm run seed:barcelona` to populate with real Barcelona data! 🚀
 
+
