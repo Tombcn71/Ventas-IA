@@ -18,6 +18,15 @@ export async function POST(request: NextRequest) {
     for (const place of places) {
       try {
         const venueId = uuidv4()
+        // Check if venue already exists
+        const existing = await sql`
+          SELECT id FROM venues WHERE name = ${place.displayName?.text || place.displayName} AND city = ${city} LIMIT 1
+        `
+        
+        if (existing.length > 0) {
+          continue // Skip duplicates
+        }
+
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
@@ -39,7 +48,6 @@ export async function POST(request: NextRequest) {
             'new',
             NOW()
           )
-          ON CONFLICT (name, city) DO NOTHING
         `
         saved++
       } catch (err) {
