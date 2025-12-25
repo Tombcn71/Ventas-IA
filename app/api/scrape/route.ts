@@ -157,7 +157,7 @@ async function analyzeVenueMenus(jobId: string, venueIds: string[]) {
 
       // Save to product_availability
       for (const brandName of detectedBrands) {
-        const brand = brands.find((b: any) => b.name === brandName)
+        const brand = brandsData.find((b: any) => b.name === brandName)
         if (brand) {
           const brandProducts = await sql`SELECT id FROM brand_products WHERE brand_id = ${brand.id} LIMIT 1`
           if (brandProducts.length > 0) {
@@ -169,11 +169,19 @@ async function analyzeVenueMenus(jobId: string, venueIds: string[]) {
         }
       }
 
-      console.log(`  ✅ ${venueId}: ${detectedBrands.size} brands`)
+      analyzed++
+      
+      // Update job progress
+      await sql`UPDATE "ScrapingJob" SET "prospectsFound" = ${analyzed} WHERE id = ${jobId}`
+      
+      console.log(`  ✅ ${analyzed}/${venueIds.length}: ${detectedBrands.size} brands found`)
     } catch (err) {
       console.error(`Error analyzing venue ${venueId}:`, err)
     }
   }
+  
+  // Mark job as completed
+  await sql`UPDATE "ScrapingJob" SET status = 'completed', "completedAt" = NOW() WHERE id = ${jobId}`
   
   console.log('✨ Menu analysis completed')
 }
