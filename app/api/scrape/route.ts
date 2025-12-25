@@ -7,26 +7,50 @@ import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
   try {
-    const { city, cuisine, limit } = await request.json()
+    const { city, places } = await request.json()
 
-    if (!city) {
-      return NextResponse.json({ error: 'City is required' }, { status: 400 })
+    if (!city || !places) {
+      return NextResponse.json({ error: 'City and places required' }, { status: 400 })
     }
 
-    // Create scraping job
-    const jobId = uuidv4()
-    await sql`
-      INSERT INTO "ScrapingJob" (id, source, status, city, cuisine, "startedAt")
-      VALUES (${jobId}, 'multiple', 'running', ${city}, ${cuisine || null}, CURRENT_TIMESTAMP)
-    `
+    let saved = 0
 
-    // Run scraping in background
-    runScraping(jobId, { city, cuisine, limit: limit || 20 })
+    for (const place of places) {
+      try {
+        const venueId = uuidv4()
+        await sql`
+          INSERT INTO venues (
+            id, name, address, city, 
+            latitude, longitude, venue_type,
+            rating, price_level, phone, website, status, created_at
+          )
+          VALUES (
+            ${venueId},
+            ${place.displayName?.text || place.displayName},
+            ${place.formattedAddress},
+            ${city},
+            ${place.location?.latitude || 0},
+            ${place.location?.longitude || 0},
+            'restaurant',
+            ${place.rating || null},
+            ${place.priceLevel ? 2 : null},
+            ${place.internationalPhoneNumber || null},
+            ${place.websiteUri || null},
+            'new',
+            NOW()
+          )
+          ON CONFLICT DO NOTHING
+        `
+        saved++
+      } catch (err) {
+        console.error('Error saving venue:', err)
+      }
+    }
 
-    return NextResponse.json({ jobId, status: 'started' })
+    return NextResponse.json({ saved })
   } catch (error) {
-    console.error('Error starting scrape:', error)
-    return NextResponse.json({ error: 'Error starting scrape' }, { status: 500 })
+    console.error('Error saving scrape:', error)
+    return NextResponse.json({ error: 'Error saving' }, { status: 500 })
   }
 }
 

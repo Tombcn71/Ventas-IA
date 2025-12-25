@@ -16,29 +16,48 @@ export default function ScrapePage() {
 
   const startScraping = async () => {
     setLoading(true)
+    setJob({ status: 'processing', prospectsFound: 0 })
+    
     try {
-      const response = await fetch('/api/scrape', {
+      // Call Google Places API directly from browser
+      const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBnCdCIEJnOuMY_MtQGOz2m7SAv849sCeg',
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.priceLevel,places.types'
+        },
+        body: JSON.stringify({
+          textQuery: `${config.cuisine || 'restaurants'} en ${config.city}, España`,
+          maxResultCount: Math.min(config.limit || 20, 20),
+          languageCode: 'es',
+        })
       })
 
       const data = await response.json()
-      setJob(data)
+      
+      if (!data.places || data.places.length === 0) {
+        setJob({ status: 'completed', prospectsFound: 0, error: 'No restaurants found' })
+        setLoading(false)
+        return
+      }
 
-      // Poll for status
-      const interval = setInterval(async () => {
-        const statusResponse = await fetch(`/api/scrape?jobId=${data.jobId}`)
-        const statusData = await statusResponse.json()
-        setJob(statusData)
+      // Send results to our API to save in database
+      const saveResponse = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          city: config.city,
+          places: data.places 
+        }),
+      })
 
-        if (statusData.status === 'completed' || statusData.status === 'failed') {
-          clearInterval(interval)
-          setLoading(false)
-        }
-      }, 2000)
+      const result = await saveResponse.json()
+      setJob({ status: 'completed', prospectsFound: result.saved || data.places.length })
+      setLoading(false)
     } catch (error) {
-      console.error('Error starting scrape:', error)
+      console.error('Error scraping:', error)
+      setJob({ status: 'failed', error: String(error) })
       setLoading(false)
     }
   }
