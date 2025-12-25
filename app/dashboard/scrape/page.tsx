@@ -25,7 +25,7 @@ export default function ScrapePage() {
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBnCdCIEJnOuMY_MtQGOz2m7SAv849sCeg',
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.priceLevel,places.types'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.priceLevel,places.types,places.photos'
         },
         body: JSON.stringify({
           textQuery: `${config.cuisine || 'restaurants'} en ${config.city}, España`,

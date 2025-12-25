@@ -27,11 +27,14 @@ export async function POST(request: NextRequest) {
           continue // Skip duplicates
         }
 
+        // Get photo URLs if available
+        const photos = place.photos?.slice(0, 5).map((p: any) => p.name) || []
+        
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
             latitude, longitude, venue_type, "businessType", source,
-            rating, price_level, "phoneNumber", website, status, "createdAt"
+            rating, price_level, "phoneNumber", website, platforms, status, "createdAt"
           )
           VALUES (
             ${venueId},
@@ -47,6 +50,7 @@ export async function POST(request: NextRequest) {
             ${place.priceLevel ? 2 : null},
             ${place.internationalPhoneNumber || null},
             ${place.websiteUri || null},
+            ${JSON.stringify({ photos })},
             'new',
             NOW()
           )

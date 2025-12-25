@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
+    "@google/generative-ai": "^0.24.1",
     "@mapbox/polyline": "^1.2.1",
     "@neondatabase/serverless": "^0.9.5",
     "@tanstack/react-query": "^5.59.0",
