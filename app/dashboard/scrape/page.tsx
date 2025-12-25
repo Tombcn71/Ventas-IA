@@ -13,6 +13,7 @@ export default function ScrapePage() {
   })
   const [job, setJob] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
 
   const startScraping = async () => {
     setLoading(true)
@@ -37,6 +38,7 @@ export default function ScrapePage() {
       const data = await response.json()
       
       console.log('Google API response:', data)
+      console.log('First place photos:', data.places?.[0]?.photos)
       
       if (data.error) {
         setJob({ status: 'failed', error: `Google API error: ${data.error.message || JSON.stringify(data.error)}` })
@@ -62,16 +64,27 @@ export default function ScrapePage() {
 
       const result = await saveResponse.json()
       
-      // Start menu analysis
+      // Start menu analysis in batches
       setJob({ status: 'analyzing', prospectsFound: result.saved })
+      setProgress({ current: 0, total: result.saved })
       
-      const analyzeResponse = await fetch('/api/analyze-all', { method: 'POST' })
-      const analyzeResult = await analyzeResponse.json()
+      let totalAnalyzed = 0
+      const batchSize = 10
+      
+      while (totalAnalyzed < result.saved) {
+        const analyzeResponse = await fetch('/api/analyze-all', { method: 'POST' })
+        const analyzeResult = await analyzeResponse.json()
+        
+        totalAnalyzed += analyzeResult.analyzed || 0
+        setProgress({ current: totalAnalyzed, total: result.saved })
+        
+        if (analyzeResult.analyzed === 0) break // No more to analyze
+      }
       
       setJob({ 
         status: 'completed', 
         prospectsFound: result.saved,
-        analyzed: analyzeResult.analyzed
+        analyzed: totalAnalyzed
       })
       setLoading(false)
     } catch (error) {
@@ -172,6 +185,21 @@ export default function ScrapePage() {
         {/* Job Status */}
         {job && (
           <div className="bg-white rounded-lg border border-gray-200 p-8">
+            {job.status === 'analyzing' && progress.total > 0 && (
+              <div className="mb-6">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>🤖 Analizando menús con Gemini...</span>
+                  <span>{progress.current} / {progress.total}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-purple-600 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">Estado del Job</h2>
               <div className="flex items-center gap-2">
