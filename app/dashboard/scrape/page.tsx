@@ -63,6 +63,11 @@ export default function ScrapePage() {
       const result = await saveResponse.json()
       setJob({ status: 'completed', prospectsFound: result.saved || data.places.length })
       setLoading(false)
+      
+      // Redirect to opportunities after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/dashboard/opportunities'
+      }, 2000)
     } catch (error) {
       console.error('Error scraping:', error)
       setJob({ status: 'failed', error: String(error) })
@@ -202,12 +207,23 @@ export default function ScrapePage() {
               </div>
 
               {job.status === 'completed' && (
-                <Link
-                  href="/dashboard/prospects"
-                  className="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  Ver Nuevos Prospects
-                </Link>
+                <div className="mt-4 space-y-2">
+                  <Link
+                    href="/dashboard/opportunities"
+                    className="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
+                  >
+                    🎯 Ver Oportunidades (Sin tu producto)
+                  </Link>
+                  <Link
+                    href="/dashboard/prospects"
+                    className="inline-block ml-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    Ver Todos los Venues
+                  </Link>
+                  <div className="text-sm text-gray-600 mt-2">
+                    ⏳ Gemini está analizando los menús en segundo plano...
+                  </div>
+                </div>
               )}
 
               {job.error && (

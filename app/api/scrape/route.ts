@@ -63,16 +63,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Return immediately, analysis happens in background
-    const response = NextResponse.json({ saved, analyzing: venueIds.length })
+    // Create a job to track progress
+    const jobId = uuidv4()
+    await sql`
+      INSERT INTO "ScrapingJob" (id, source, status, city, "prospectsFound", "startedAt")
+      VALUES (${jobId}, 'google_places', 'analyzing_menus', ${city}, ${saved}, NOW())
+    `
     
-    // Start menu analysis AFTER response is sent
+    // Start menu analysis in background
     if (venueIds.length > 0) {
-      // Don't await - let it run in background
-      Promise.resolve().then(() => analyzeVenueMenus(venueIds))
+      Promise.resolve().then(() => analyzeVenueMenus(jobId, venueIds))
     }
 
-    return response
+    return NextResponse.json({ saved, analyzing: venueIds.length, jobId })
   } catch (error) {
     console.error('Error saving scrape:', error)
     return NextResponse.json({ error: 'Error saving' }, { status: 500 })
@@ -107,20 +110,28 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function analyzeVenueMenus(venueIds: string[]) {
+async function analyzeVenueMenus(jobId: string, venueIds: string[]) {
   const { analyzeMenuPhoto } = await import('@/lib/scrapers/gemini-menu-analyzer')
   
   console.log(`🤖 Starting menu analysis for ${venueIds.length} venues...`)
   
   // Get active brands
-  const brands = await sql`SELECT id, name FROM brands WHERE active = true`
-  const brandNames = brands.map((b: any) => b.name)
+  const brandsData = await sql`
+    SELECT DISTINCT b.id, b.name 
+    FROM brands b
+    INNER JOIN brand_products bp ON b.id = bp.brand_id
+    WHERE bp.active = true
+  `
+  const brandNames = brandsData.map((b: any) => b.name)
   
   if (brandNames.length === 0) {
+    await sql`UPDATE "ScrapingJob" SET status = 'completed', "completedAt" = NOW() WHERE id = ${jobId}`
     console.log('⚠️  No active brands configured')
     return
   }
 
+  let analyzed = 0
+  
   for (const venueId of venueIds) {
     try {
       const venue = await sql`SELECT platforms FROM venues WHERE id = ${venueId} LIMIT 1`
