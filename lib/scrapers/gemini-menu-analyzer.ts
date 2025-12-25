@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { ImageAnnotatorClient } from '@google-cloud/vision'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
@@ -51,9 +50,7 @@ Only brands clearly mentioned in the text.`
 
 async function extractTextWithVision(photoUrl: string): Promise<string> {
   try {
-    const apiKey = process.env.GOOGLE_CLOUD_VISION_KEY
-    
-    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_CLOUD_VISION_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -69,7 +66,7 @@ async function extractTextWithVision(photoUrl: string): Promise<string> {
     
     return text
   } catch (error) {
-    console.error('Vision OCR error:', error)
+    console.error('Vision AI error:', error)
     return ''
   }
 }
