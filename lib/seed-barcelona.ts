@@ -33,14 +33,27 @@ async function seed() {
   console.log('🌱 Starting Barcelona seeding with real data...\n')
 
   try {
-    // Step 1: Create brands
+    // Step 1: Create brands first
     console.log('📦 Creating brands...')
     for (const brand of ALL_BRANDS) {
+      const brandId = uuidv4()
+      await sql`
+        INSERT INTO brands (id, name, category, keywords, active)
+        VALUES (
+          ${brandId},
+          ${brand.name},
+          ${brand.category},
+          ${stringifyJson(brand.keywords)},
+          true
+        )
+        ON CONFLICT (name) DO NOTHING
+      `
+      
       await sql`
         INSERT INTO brand_products (id, brand_id, product_name, category, keywords, active)
         VALUES (
           ${brand.id},
-          ${brand.id},
+          ${brandId},
           ${brand.name},
           ${brand.category},
           ${stringifyJson(brand.keywords)},

@@ -17,50 +17,41 @@ export class GooglePlacesScraper {
     const results: RestaurantData[] = []
 
     try {
-      // Search for restaurants in the city
-      const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json`
-      const response = await axios.get(searchUrl, {
-        params: {
-          query: `${config.cuisine || 'restaurants'} en ${config.city}, España`,
-          key: this.apiKey,
-          language: 'es',
-          type: 'restaurant',
-        },
+      // New Places API (Text Search)
+      const searchUrl = `https://places.googleapis.com/v1/places:searchText`
+      const response = await axios.post(searchUrl, {
+        textQuery: `${config.cuisine || 'restaurants'} en ${config.city}, España`,
+        maxResultCount: Math.min(config.limit || 20, 20),
+        languageCode: 'es',
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': this.apiKey,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.priceLevel,places.types'
+        }
       })
 
-      const places = response.data.results.slice(0, config.limit || 20)
+      const places = response.data.places || []
 
       for (const place of places) {
-        // Get detailed information
-        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json`
-        const detailsResponse = await axios.get(detailsUrl, {
-          params: {
-            place_id: place.place_id,
-            fields:
-              'name,formatted_address,geometry,formatted_phone_number,website,rating,user_ratings_total,price_level,types',
-            key: this.apiKey,
-            language: 'es',
-          },
-        })
-
-        const details = detailsResponse.data.result
+        const details = place
 
         const restaurantData: RestaurantData = {
-          name: details.name,
-          address: details.formatted_address,
+          name: details.displayName?.text || details.displayName,
+          address: details.formattedAddress,
           city: config.city,
-          latitude: details.geometry.location.lat,
-          longitude: details.geometry.location.lng,
-          phoneNumber: details.formatted_phone_number,
-          website: details.website,
-          businessType: this.determineBusinessType(details.types),
+          latitude: details.location?.latitude || 0,
+          longitude: details.location?.longitude || 0,
+          phoneNumber: details.internationalPhoneNumber,
+          website: details.websiteUri,
+          businessType: this.determineBusinessType(details.types || []),
           rating: details.rating,
-          reviewCount: details.user_ratings_total,
-          priceRange: this.convertPriceLevel(details.price_level),
+          reviewCount: details.userRatingCount,
+          priceRange: this.convertPriceLevel(details.priceLevel),
           currentProducts: [],
           menuItems: [],
           source: 'google_places',
-          sourceUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+          sourceUrl: `https://www.google.com/maps/place/?q=place_id:${details.id}`,
         }
 
         results.push(restaurantData)
@@ -83,8 +74,18 @@ export class GooglePlacesScraper {
     return 'restaurant'
   }
 
-  private convertPriceLevel(level?: number): string {
+  private convertPriceLevel(level?: string | number): string {
     if (!level) return '€€'
+    if (typeof level === 'string') {
+      const priceMap: Record<string, string> = {
+        'PRICE_LEVEL_FREE': '€',
+        'PRICE_LEVEL_INEXPENSIVE': '€',
+        'PRICE_LEVEL_MODERATE': '€€',
+        'PRICE_LEVEL_EXPENSIVE': '€€€',
+        'PRICE_LEVEL_VERY_EXPENSIVE': '€€€€'
+      }
+      return priceMap[level] || '€€'
+    }
     return '€'.repeat(level)
   }
 

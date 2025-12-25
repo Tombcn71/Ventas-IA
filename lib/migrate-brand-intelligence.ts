@@ -1,4 +1,20 @@
-import { sql } from './db'
+import { neon } from '@neondatabase/serverless'
+
+// For local development, try to load .env files
+if (!process.env.DATABASE_URL) {
+  try {
+    require('dotenv').config({ path: '.env.local' })
+  } catch {}
+  try {
+    require('dotenv').config({ path: '.env' })
+  } catch {}
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set. Please set it in .env.local or environment variables')
+}
+
+const sql = neon(process.env.DATABASE_URL)
 
 /**
  * Brand Intelligence Migration
@@ -38,22 +54,31 @@ async function migrate() {
     `
     console.log('✅ Created brand_products table')
 
-    // 3. Rename prospects to venues (if exists)
-    await sql`
-      ALTER TABLE IF EXISTS prospects RENAME TO venues
-    `
-    console.log('✅ Renamed prospects to venues')
+    // 3. Rename Prospect to venues (if exists and venues doesn't exist)
+    try {
+      await sql`
+        ALTER TABLE "Prospect" RENAME TO venues
+      `
+      console.log('✅ Renamed Prospect to venues')
+    } catch (error: any) {
+      if (error.code === '42P07') {
+        console.log('ℹ️  venues table already exists, skipping rename')
+      } else {
+        throw error
+      }
+    }
 
-    // 4. Add new columns to venues
+    // 4. Add new columns to venues (use DO block to handle existing columns)
     await sql`
-      ALTER TABLE venues 
-      ADD COLUMN IF NOT EXISTS venue_type TEXT DEFAULT 'restaurant',
-      ADD COLUMN IF NOT EXISTS cuisine_type JSONB DEFAULT '[]',
-      ADD COLUMN IF NOT EXISTS rating DECIMAL DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS price_level INTEGER DEFAULT 2,
-      ADD COLUMN IF NOT EXISTS estimated_weekly_visitors INTEGER DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS platforms JSONB DEFAULT '{}',
-      ADD COLUMN IF NOT EXISTS last_scraped_at TIMESTAMP
+      DO $$
+      BEGIN
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS venue_type TEXT DEFAULT 'restaurant';
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS cuisine_type JSONB DEFAULT '[]';
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS price_level INTEGER DEFAULT 2;
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS estimated_weekly_visitors INTEGER DEFAULT 0;
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS platforms JSONB DEFAULT '{}';
+        ALTER TABLE venues ADD COLUMN IF NOT EXISTS last_scraped_at TIMESTAMP;
+      END $$;
     `
     console.log('✅ Added new columns to venues')
 
@@ -110,22 +135,23 @@ async function migrate() {
     await sql`CREATE INDEX IF NOT EXISTS idx_competitor_presence_venue ON competitor_presence(venue_id)`
     console.log('✅ Created performance indexes')
 
-    // 9. Update routes table to reference venues
+    // 9. Update Route table to reference venues
     await sql`
-      ALTER TABLE routes
+      ALTER TABLE "Route"
       ADD COLUMN IF NOT EXISTS territory_id TEXT REFERENCES sales_territories(id)
     `
-    console.log('✅ Updated routes table')
+    console.log('✅ Updated Route table')
 
-    // 10. Update visits table
+    // 10. Update Visit table
     await sql`
-      ALTER TABLE visits
-      ADD COLUMN IF NOT EXISTS outcome TEXT,
-      ADD COLUMN IF NOT EXISTS products_pitched JSONB DEFAULT '[]',
-      ADD COLUMN IF NOT EXISTS products_sold JSONB DEFAULT '[]',
-      ADD COLUMN IF NOT EXISTS competitor_info JSONB DEFAULT '{}'
+      DO $$
+      BEGIN
+        ALTER TABLE "Visit" ADD COLUMN IF NOT EXISTS products_pitched JSONB DEFAULT '[]';
+        ALTER TABLE "Visit" ADD COLUMN IF NOT EXISTS products_sold JSONB DEFAULT '[]';
+        ALTER TABLE "Visit" ADD COLUMN IF NOT EXISTS competitor_info JSONB DEFAULT '{}';
+      END $$;
     `
-    console.log('✅ Updated visits table')
+    console.log('✅ Updated Visit table')
 
     console.log('✨ Migration completed successfully!')
     

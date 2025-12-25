@@ -6,8 +6,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const salesPerson = searchParams.get('salesPerson')
 
-    const whereClause = salesPerson ? sql`WHERE "assignedTo" = ${salesPerson}` : sql``
-
     // Get overall stats
     const [
       totalProspects,
@@ -19,11 +17,21 @@ export async function GET(request: NextRequest) {
       successfulVisits,
       totalRevenue,
     ] = await Promise.all([
-      sql`SELECT COUNT(*) as count FROM "Prospect" ${whereClause}`.then((r: any) => Number(r[0]?.count) || 0),
-      sql`SELECT COUNT(*) as count FROM "Prospect" ${whereClause} AND priority = 'high'`.then((r: any) => Number(r[0]?.count) || 0),
-      sql`SELECT COUNT(*) as count FROM "Prospect" ${whereClause} AND status = 'new'`.then((r: any) => Number(r[0]?.count) || 0),
-      sql`SELECT COUNT(*) as count FROM "Prospect" ${whereClause} AND status = 'contacted'`.then((r: any) => Number(r[0]?.count) || 0),
-      sql`SELECT COUNT(*) as count FROM "Prospect" ${whereClause} AND status = 'customer'`.then((r: any) => Number(r[0]?.count) || 0),
+      salesPerson
+        ? sql`SELECT COUNT(*) as count FROM "Prospect" WHERE "assignedTo" = ${salesPerson}`.then((r: any) => Number(r[0]?.count) || 0)
+        : sql`SELECT COUNT(*) as count FROM "Prospect"`.then((r: any) => Number(r[0]?.count) || 0),
+      salesPerson
+        ? sql`SELECT COUNT(*) as count FROM "Prospect" WHERE "assignedTo" = ${salesPerson} AND priority = 'high'`.then((r: any) => Number(r[0]?.count) || 0)
+        : sql`SELECT COUNT(*) as count FROM "Prospect" WHERE priority = 'high'`.then((r: any) => Number(r[0]?.count) || 0),
+      salesPerson
+        ? sql`SELECT COUNT(*) as count FROM "Prospect" WHERE "assignedTo" = ${salesPerson} AND status = 'new'`.then((r: any) => Number(r[0]?.count) || 0)
+        : sql`SELECT COUNT(*) as count FROM "Prospect" WHERE status = 'new'`.then((r: any) => Number(r[0]?.count) || 0),
+      salesPerson
+        ? sql`SELECT COUNT(*) as count FROM "Prospect" WHERE "assignedTo" = ${salesPerson} AND status = 'contacted'`.then((r: any) => Number(r[0]?.count) || 0)
+        : sql`SELECT COUNT(*) as count FROM "Prospect" WHERE status = 'contacted'`.then((r: any) => Number(r[0]?.count) || 0),
+      salesPerson
+        ? sql`SELECT COUNT(*) as count FROM "Prospect" WHERE "assignedTo" = ${salesPerson} AND status = 'customer'`.then((r: any) => Number(r[0]?.count) || 0)
+        : sql`SELECT COUNT(*) as count FROM "Prospect" WHERE status = 'customer'`.then((r: any) => Number(r[0]?.count) || 0),
       salesPerson
         ? sql`SELECT COUNT(*) as count FROM "Visit" WHERE "salesPerson" = ${salesPerson}`.then((r: any) => Number(r[0]?.count) || 0)
         : sql`SELECT COUNT(*) as count FROM "Visit"`.then((r: any) => Number(r[0]?.count) || 0),

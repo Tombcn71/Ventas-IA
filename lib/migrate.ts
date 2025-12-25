@@ -1,4 +1,20 @@
-import { sql } from './db'
+import { neon } from '@neondatabase/serverless'
+
+// For local development, try to load .env files
+if (!process.env.DATABASE_URL) {
+  try {
+    require('dotenv').config({ path: '.env.local' })
+  } catch {}
+  try {
+    require('dotenv').config({ path: '.env' })
+  } catch {}
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set. Please set it in .env.local or environment variables')
+}
+
+const sql = neon(process.env.DATABASE_URL)
 
 async function migrate() {
   console.log('🚀 Running database migrations...')
