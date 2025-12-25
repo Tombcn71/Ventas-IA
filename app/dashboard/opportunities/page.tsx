@@ -9,10 +9,25 @@ export default function OpportunitiesPage() {
   const [city, setCity] = useState('Barcelona')
   const [venues, setVenues] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [analysisStatus, setAnalysisStatus] = useState<any>(null)
 
   useEffect(() => {
     fetchBrands()
+    fetchAnalysisStatus()
+    // Poll status every 10 seconds
+    const interval = setInterval(fetchAnalysisStatus, 10000)
+    return () => clearInterval(interval)
   }, [])
+
+  const fetchAnalysisStatus = async () => {
+    try {
+      const response = await fetch('/api/menu-analysis-status')
+      const data = await response.json()
+      setAnalysisStatus(data)
+    } catch (error) {
+      console.error('Error fetching status:', error)
+    }
+  }
 
   useEffect(() => {
     if (selectedBrand) {
@@ -52,6 +67,29 @@ export default function OpportunitiesPage() {
           <p className="text-gray-600">
             Venues que NO tienen tu producto - oportunidades de negocio
           </p>
+          
+          {analysisStatus && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-blue-900">
+                  🤖 Estado de Análisis Gemini
+                </span>
+                <span className="text-blue-700 font-bold">
+                  {analysisStatus.analyzed} / {analysisStatus.total} venues ({analysisStatus.progress}%)
+                </span>
+              </div>
+              {analysisStatus.analyzed < analysisStatus.total && (
+                <div className="text-sm text-blue-700">
+                  ⏳ Analizando menús en segundo plano...
+                </div>
+              )}
+              {analysisStatus.analyzed === analysisStatus.total && analysisStatus.total > 0 && (
+                <div className="text-sm text-green-700 font-semibold">
+                  ✅ Análisis completado
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Filters */}
