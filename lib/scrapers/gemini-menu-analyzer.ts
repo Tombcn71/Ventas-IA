@@ -13,7 +13,7 @@ interface MenuAnalysisResult {
  */
 export async function analyzeMenuPhoto(photoUrl: string, brandsToLookFor: string[]): Promise<MenuAnalysisResult> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     
     const prompt = `Analyze this menu/drink photo and tell me which of these brands/products you see: ${brandsToLookFor.join(', ')}.
 
