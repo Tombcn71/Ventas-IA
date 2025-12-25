@@ -69,8 +69,15 @@ export async function POST(request: Request) {
     }
 
     const id = uuidv4()
-    const brandId = uuidv4() // Each product is its own brand for simplicity
+    const brandId = uuidv4()
 
+    // First create brand
+    await sql`
+      INSERT INTO brands (id, name, company)
+      VALUES (${brandId}, ${name}, ${name})
+    `
+
+    // Then create brand_product
     await sql`
       INSERT INTO brand_products (
         id,
