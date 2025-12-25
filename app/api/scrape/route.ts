@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
-            latitude, longitude, venue_type,
+            latitude, longitude, venue_type, "businessType",
             rating, price_level, "phoneNumber", website, status, "createdAt"
           )
           VALUES (
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
             ${city},
             ${place.location?.latitude || 0},
             ${place.location?.longitude || 0},
+            'restaurant',
             'restaurant',
             ${place.rating || null},
             ${place.priceLevel ? 2 : null},
