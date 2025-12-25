@@ -171,6 +171,9 @@ export default function ProspectsPage() {
 }
 
 function ProspectCard({ prospect }: { prospect: any }) {
+  const [analyzing, setAnalyzing] = useState(false)
+  const [menuResults, setMenuResults] = useState<any>(null)
+  
   const statusColors: any = {
     new: 'bg-blue-100 text-blue-800',
     contacted: 'bg-yellow-100 text-yellow-800',
@@ -188,6 +191,23 @@ function ProspectCard({ prospect }: { prospect: any }) {
   const missingProducts = Array.isArray(prospect.missingProducts)
     ? prospect.missingProducts
     : []
+  
+  const analyzeMenu = async () => {
+    setAnalyzing(true)
+    try {
+      const response = await fetch('/api/analyze-menus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ venueId: prospect.id })
+      })
+      const data = await response.json()
+      setMenuResults(data)
+    } catch (error) {
+      console.error('Error analyzing menu:', error)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
