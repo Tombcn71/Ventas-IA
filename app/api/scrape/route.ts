@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     let saved = 0
+    const venueIds: string[] = []
 
     for (const place of places) {
       try {
@@ -56,12 +57,18 @@ export async function POST(request: NextRequest) {
           )
         `
         saved++
+        if (photos.length > 0) venueIds.push(venueId)
       } catch (err) {
         console.error('Error saving venue:', err)
       }
     }
 
-    return NextResponse.json({ saved })
+    // Start automatic menu analysis in background
+    if (venueIds.length > 0) {
+      analyzeVenueMenus(venueIds).catch(err => console.error('Background analysis:', err))
+    }
+
+    return NextResponse.json({ saved, analyzing: venueIds.length })
   } catch (error) {
     console.error('Error saving scrape:', error)
     return NextResponse.json({ error: 'Error saving' }, { status: 500 })
@@ -94,6 +101,66 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching scraping jobs:', error)
     return NextResponse.json({ error: 'Error fetching jobs' }, { status: 500 })
   }
+}
+
+async function analyzeVenueMenus(venueIds: string[]) {
+  const { analyzeMenuPhoto } = await import('@/lib/scrapers/gemini-menu-analyzer')
+  
+  console.log(`🤖 Starting menu analysis for ${venueIds.length} venues...`)
+  
+  // Get active brands
+  const brands = await sql`SELECT id, name FROM brands WHERE active = true`
+  const brandNames = brands.map((b: any) => b.name)
+  
+  if (brandNames.length === 0) {
+    console.log('⚠️  No active brands configured')
+    return
+  }
+
+  for (const venueId of venueIds) {
+    try {
+      const venue = await sql`SELECT platforms FROM venues WHERE id = ${venueId} LIMIT 1`
+      const platforms = typeof venue[0].platforms === 'string' 
+        ? JSON.parse(venue[0].platforms) 
+        : venue[0].platforms || {}
+      
+      const photos = platforms.photos || []
+      if (photos.length === 0) continue
+
+      const detectedBrands = new Set<string>()
+      
+      // Analyze first 3 photos with Gemini
+      for (const photoName of photos.slice(0, 3)) {
+        try {
+          const photoUrl = `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=1600&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+          const result = await analyzeMenuPhoto(photoUrl, brandNames)
+          result.brands.forEach(b => detectedBrands.add(b))
+        } catch (err) {
+          console.error('Photo analysis error:', err)
+        }
+      }
+
+      // Save to product_availability
+      for (const brandName of detectedBrands) {
+        const brand = brands.find((b: any) => b.name === brandName)
+        if (brand) {
+          const brandProducts = await sql`SELECT id FROM brand_products WHERE brand_id = ${brand.id} LIMIT 1`
+          if (brandProducts.length > 0) {
+            await sql`
+              INSERT INTO product_availability (id, venue_id, brand_product_id, is_available, detected_at)
+              VALUES (${uuidv4()}, ${venueId}, ${brandProducts[0].id}, true, NOW())
+            `
+          }
+        }
+      }
+
+      console.log(`  ✅ ${venueId}: ${detectedBrands.size} brands`)
+    } catch (err) {
+      console.error(`Error analyzing venue ${venueId}:`, err)
+    }
+  }
+  
+  console.log('✨ Menu analysis completed')
 }
 
 async function runScraping(
