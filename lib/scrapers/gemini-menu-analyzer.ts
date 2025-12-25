@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { ImageAnnotatorClient } from '@google-cloud/vision'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
@@ -9,49 +10,67 @@ interface MenuAnalysisResult {
 }
 
 /**
- * Analyze menu photo with Gemini Flash Vision
+ * Step 1: Extract text with Vision OCR
+ * Step 2: Analyze text with Gemini
  */
 export async function analyzeMenuPhoto(photoUrl: string, brandsToLookFor: string[]): Promise<MenuAnalysisResult> {
   try {
+    // Step 1: OCR with Vision AI
+    const menuText = await extractTextWithVision(photoUrl)
+    
+    if (!menuText || menuText.length < 10) {
+      return { brands: [], products: [], confidence: 0 }
+    }
+    
+    // Step 2: Analyze text with Gemini (cheap!)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     
-    const prompt = `Analyze this menu/drink photo and tell me which of these brands/products you see: ${brandsToLookFor.join(', ')}.
+    const prompt = `This is text extracted from a menu/bar photo:
 
-Return ONLY a JSON object like this:
-{
-  "found": ["brand1", "brand2"],
-  "confidence": 0.9
-}
+"${menuText}"
 
-Only include brands you clearly see in the image. Be strict.`
+Which of these brands do you see mentioned: ${brandsToLookFor.join(', ')}?
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          mimeType: 'image/jpeg',
-          data: await fetchImageAsBase64(photoUrl)
-        }
-      }
-    ])
-    
+Return ONLY a JSON array: ["brand1", "brand2"]
+Only brands clearly mentioned in the text.`
+
+    const result = await model.generateContent(prompt)
     const response = result.response.text()
-    const json = JSON.parse(response.replace(/```json|```/g, '').trim())
+    const json = JSON.parse(response.replace(/```json|```|\[|\]/g, '').trim().split(',').map(s => s.trim().replace(/"/g, '')))
     
     return {
-      brands: json.found || [],
-      products: json.found || [],
-      confidence: json.confidence || 0.5
+      brands: Array.isArray(json) ? json.filter(Boolean) : [],
+      products: [],
+      confidence: 0.8
     }
   } catch (error) {
-    console.error('Gemini analysis error:', error)
+    console.error('Analysis error:', error)
     return { brands: [], products: [], confidence: 0 }
   }
 }
 
-async function fetchImageAsBase64(url: string): Promise<string> {
-  const response = await fetch(url)
-  const buffer = await response.arrayBuffer()
-  return Buffer.from(buffer).toString('base64')
+async function extractTextWithVision(photoUrl: string): Promise<string> {
+  try {
+    const apiKey = process.env.GOOGLE_CLOUD_VISION_KEY
+    
+    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{
+          image: { source: { imageUri: photoUrl } },
+          features: [{ type: 'TEXT_DETECTION' }]
+        }]
+      })
+    })
+    
+    const data = await response.json()
+    const text = data.responses?.[0]?.textAnnotations?.[0]?.description || ''
+    
+    return text
+  } catch (error) {
+    console.error('Vision OCR error:', error)
+    return ''
+  }
 }
 

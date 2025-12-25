@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 async function test() {
   // Get venue with photos
-  const venues = await sql`SELECT id, name, platforms FROM venues WHERE platforms IS NOT NULL LIMIT 5`
+  const venues = await sql`SELECT id, name, platforms FROM venues WHERE platforms::text != '{}' LIMIT 5`
   
   for (const venue of venues) {
     const platforms = typeof venue.platforms === 'string' ? JSON.parse(venue.platforms) : venue.platforms
