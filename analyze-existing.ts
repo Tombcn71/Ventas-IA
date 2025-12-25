@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 async function analyzeMenuPhoto(photoUrl: string, brands: string[]): Promise<string[]> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     
     const prompt = `Analyze this menu/drink photo. Which of these brands do you see: ${brands.join(', ')}?
 Return ONLY a JSON array like: ["brand1", "brand2"]
