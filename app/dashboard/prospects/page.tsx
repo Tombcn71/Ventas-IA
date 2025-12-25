@@ -67,35 +67,8 @@ export default function ProspectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <Link href="/" className="text-2xl font-bold text-primary-600">
-                DashLeads
-              </Link>
-            </div>
-            <nav className="flex gap-4">
-              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
-                Dashboard
-              </Link>
-              <Link href="/prospects" className="text-primary-600 font-semibold">
-                Prospects
-              </Link>
-              <Link href="/routes" className="text-gray-700 hover:text-primary-600">
-                Rutas
-              </Link>
-              <Link href="/scrape" className="text-gray-700 hover:text-primary-600">
-                Scraping
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Prospects</h1>
           <p className="text-gray-600">
@@ -174,7 +147,7 @@ export default function ProspectsPage() {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <p className="text-gray-600 text-lg">No se encontraron prospects</p>
             <Link
-              href="/scrape"
+              href="/dashboard/scrape"
               className="mt-4 inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               Iniciar Scraping
@@ -192,7 +165,7 @@ export default function ProspectsPage() {
             </div>
           </>
         )}
-      </main>
+      </div>
     </div>
   )
 }
@@ -329,7 +302,7 @@ function ProspectCard({ prospect }: { prospect: any }) {
           )}
         </div>
         <Link
-          href={`/prospects/${prospect.id}`}
+          href={`/dashboard/prospects/${prospect.id}`}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition flex items-center gap-1 text-sm"
         >
           Ver Detalles <ChevronRight className="w-4 h-4" />

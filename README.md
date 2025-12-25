@@ -1,240 +1,288 @@
-# DashLeads - Sales Intelligence Platform
+# VentasIA - AI Sales Copilot for Spain 🇪🇸
 
-Una plataforma de inteligencia de ventas para el mercado español que ayuda a equipos de ventas B2B a identificar oportunidades mediante el análisis de datos de restaurantes, bares y cafeterías.
+**VentasIA** es una plataforma de inteligencia de ventas que ayuda a equipos comerciales a encontrar clientes potenciales que **aún no venden su producto**. Usando IA y datos públicos de 30.000+ restaurantes y bares en España, convertimos información desordenada en rutas inteligentes y oportunidades de venta reales.
 
-## 🎯 Concepto
+![VentasIA](https://img.shields.io/badge/Next.js-16-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-green)
 
-DashLeads scrapes datos de múltiples plataformas españolas para identificar qué productos NO venden los establecimientos, convirtiéndolos en leads calificados para vendedores de bebidas, alimentos y otros productos horeca.
+## 🎯 ¿Qué Hace VentasIA?
 
-### Características Principales
+### Para Equipos de Ventas (Heineken, Coca-Cola, etc.)
 
-- **🔍 Scraping Inteligente**: Extrae datos de Google Places, TripAdvisor, Glovo y más
-- **🎯 Gap Analysis**: Identifica productos faltantes (ej: no venden Heineken)
-- **📊 Lead Scoring**: Calcula automáticamente la calidad de cada lead
-- **🗺️ Planificación de Rutas**: Optimiza rutas de visitas para maximizar eficiencia
-- **📱 Dashboard Completo**: Gestión de prospects, visitas y estadísticas
-- **🇪🇸 Enfoque en España**: Adaptado para el mercado español
+1. **📸 Recopilamos Datos Automáticamente**
+   - Extraemos menús de fotos de Google Places usando OCR
+   - Detectamos qué marcas están presentes en cada venue
+   - Actualizamos datos mensualmente
 
-## 🏗️ Stack Tecnológico
+2. **🤖 IA Encuentra Oportunidades**
+   - Identifica venues sin tu marca pero con alto potencial
+   - Calcula opportunity scores basados en rating, tráfico, competencia
+   - Prioriza los mejores leads
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
-- **Database**: SQLite (Prisma ORM)
-- **Scraping**: Cheerio, Axios, Puppeteer
-- **Maps**: Leaflet, Google Maps API
-- **UI**: Lucide Icons, Recharts
+3. **🗺️ IA Planifica Rutas Inteligentes**
+   - Optimiza el orden de visitas
+   - Genera briefings pre-visita con contexto del cliente
+   - Ahorra tiempo y aumenta conversiones
 
-## 📚 Fuentes de Datos
+## 🚀 Quick Start
 
-### Activas
-- ✅ **Google Places API**: Información básica, coordenadas, ratings
-- ✅ **TripAdvisor**: Reviews, menciones de productos en comentarios
+### Barcelona MVP (50 venues, 15 minutos)
 
-### En Desarrollo
-- 🔨 **Glovo**: Menús y productos
-- 🔨 **Just Eat Spain**: Menús de delivery
-- 🔨 **El Tenedor**: Información de restaurantes
-
-## 🚀 Instalación
-
-### Prerrequisitos
-- Node.js 18+
-- npm o yarn
-
-### Pasos
-
-1. **Clonar el repositorio**
 ```bash
-git clone <tu-repo>
+# 1. Clone repo
+git clone https://github.com/Tombcn71/dashleads.git
 cd dashleads
-```
 
-2. **Instalar dependencias**
-```bash
+# 2. Install dependencies
 npm install
-```
 
-3. **Configurar variables de entorno**
-```bash
+# 3. Setup environment
 cp .env.example .env
-```
+# Add your Google Maps API key and Cloud Vision credentials
 
-Edita `.env` y añade tus API keys:
-```env
-DATABASE_URL="file:./dev.db"
-GOOGLE_MAPS_API_KEY=tu_api_key_aqui
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+# 4. Run database migration
+npm run db:migrate:brand
 
-4. **Inicializar la base de datos**
-```bash
-npx prisma db push
-```
+# 5. Scrape Barcelona data (50 venues)
+npm run seed:barcelona
 
-5. **Ejecutar en desarrollo**
-```bash
+# 6. Start dev server
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
-## 📖 Uso
+**Detailed setup**: Ver [SETUP_BARCELONA.md](./SETUP_BARCELONA.md)
 
-### 1. Scraping de Datos
+## 🛠️ Tech Stack
 
-1. Ve a `/scrape`
-2. Selecciona una ciudad española (Madrid, Barcelona, Valencia, etc.)
-3. Opcionalmente especifica tipo de cocina
-4. Haz clic en "Iniciar Scraping"
-5. Espera a que complete (puede tardar varios minutos)
+| Category | Technology |
+|----------|-----------|
+| **Framework** | Next.js 16 + TypeScript |
+| **Database** | Neon (PostgreSQL) |
+| **Styling** | Tailwind CSS |
+| **Data Collection** | Google Places API + Cloud Vision OCR |
+| **Maps** | Leaflet + React Leaflet |
+| **Charts** | Recharts |
+| **Deployment** | Vercel |
 
-### 2. Gestión de Prospects
+## 📊 Architecture
 
-1. Ve a `/prospects`
-2. Filtra por ciudad, estado, prioridad o lead score
-3. Haz clic en un prospect para ver detalles completos
-4. Ve oportunidades (productos que NO venden)
-5. Actualiza estado, añade notas, programa follow-ups
+### Data Flow
 
-### 3. Planificación de Rutas
+```
+Google Places API
+    ↓
+Venue Photos (menu images)
+    ↓
+Google Cloud Vision OCR
+    ↓
+Text Extraction
+    ↓
+Brand Detection (Heineken, Mahou, Coca-Cola, etc.)
+    ↓
+Database (venues + product_availability)
+    ↓
+Dashboard (Coverage + Opportunities)
+```
 
-1. Ve a `/routes/create`
-2. Selecciona prospects para visitar
-3. El sistema optimiza la ruta automáticamente
-4. Guarda la ruta y asigna a un vendedor
-5. Sigue el progreso de visitas
+### Database Schema
 
-### 4. Dashboard y Estadísticas
+```sql
+brands                  -- Heineken, Coca-Cola, etc.
+  ↓
+brand_products         -- Heineken Lager, Coca-Cola Zero, etc.
+  ↓
+venues                 -- Restaurants/bars
+  ↓
+product_availability   -- Which products are sold where
+  ↓
+competitor_presence    -- Competitor analysis
+  ↓
+sales_territories      -- Territory mapping
+```
 
-1. Ve a `/dashboard`
-2. Ve KPIs principales
-3. Analiza conversión por ciudad
-4. Revisa actividad reciente
-5. Identifica top oportunidades
+**Full schema**: Ver [docs/BRAND_INTELLIGENCE_ARCHITECTURE.md](./docs/BRAND_INTELLIGENCE_ARCHITECTURE.md)
 
-## 🗂️ Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 dashleads/
-├── app/                      # Next.js App Router
-│   ├── api/                 # API endpoints
-│   │   ├── prospects/       # CRUD prospects
-│   │   ├── routes/          # Gestión de rutas
-│   │   ├── visits/          # Registro de visitas
-│   │   ├── scrape/          # Jobs de scraping
-│   │   └── stats/           # Estadísticas
-│   ├── prospects/           # Páginas de prospects
-│   ├── routes/              # Páginas de rutas
-│   ├── scrape/              # Interface de scraping
-│   └── page.tsx             # Homepage
+├── app/
+│   ├── api/                      # API routes
+│   │   ├── brands/              # Brand management
+│   │   ├── coverage/            # Coverage analysis
+│   │   ├── opportunities/       # Sales opportunities
+│   │   ├── prospects/           # Prospect management
+│   │   ├── routes/              # Route planning
+│   │   └── stats/               # Dashboard stats
+│   ├── dashboard/               # Dashboard UI
+│   │   ├── components/          # Shared components
+│   │   ├── coverage/            # Coverage view
+│   │   ├── opportunities/       # Opportunities view
+│   │   ├── prospects/           # Prospect management
+│   │   ├── routes/              # Route planning
+│   │   └── scrape/              # Admin: data collection
+│   └── page.tsx                 # Homepage
 ├── lib/
-│   ├── scrapers/            # Módulos de scraping
-│   │   ├── google-places.ts
-│   │   ├── tripadvisor-scraper.ts
-│   │   ├── glovo-scraper.ts
-│   │   ├── product-detector.ts
-│   │   └── index.ts
-│   ├── prisma.ts            # Prisma client
-│   └── utils.ts             # Utilidades
-├── prisma/
-│   └── schema.prisma        # Database schema
-└── package.json
+│   ├── scrapers/
+│   │   └── google-places-menus.ts  # Google Places + OCR scraper
+│   ├── db.ts                    # Database connection
+│   ├── migrate-brand-intelligence.ts  # Schema migrations
+│   ├── seed-barcelona.ts        # Barcelona data seeding
+│   └── seed-brand-intelligence.ts     # Demo data
+├── docs/
+│   ├── ARCHITECTURE.md          # System architecture
+│   ├── BARCELONA_MVP.md         # Barcelona MVP guide
+│   └── BRAND_INTELLIGENCE_ARCHITECTURE.md  # Data model
+└── SETUP_BARCELONA.md           # Setup instructions
 ```
 
-## 🎯 Productos Tracked
+## 🎨 Features
 
-La plataforma detecta la presencia/ausencia de:
+### 1. Coverage Dashboard (`/dashboard/coverage`)
 
-### Cervezas
-- Heineken, Estrella Damm, Mahou, San Miguel, Cruzcampo, Amstel, Corona, Alhambra
+- **Penetración de Mercado**: % de venues con tu marca
+- **Coverage por Ciudad**: Barcelona, Madrid, Valencia, etc.
+- **Coverage por Tipo**: Restaurantes, bares, cafés
+- **Product Performance**: Cuáles productos venden mejor
+- **Recent Changes**: Nuevas adiciones/eliminaciones
 
-### Refrescos
-- Coca-Cola, Pepsi, Fanta, Aquarius, Nestea, Red Bull
+### 2. Opportunities Dashboard (`/dashboard/opportunities`)
 
-### Vinos
-- Rioja, Ribera del Duero, Albariño, Verdejo, Cava
+- **Sales Opportunities**: Venues sin tu marca
+- **Opportunity Score**: Basado en rating, tráfico, competencia
+- **Priority Levels**: High/Medium/Low
+- **Competitor Analysis**: Qué marcas están presentes
+- **Quick Actions**: Añadir a ruta, ver detalles
 
-### Licores
-- Absolut, Jägermeister, Licor 43, Baileys
+### 3. Route Planning (`/dashboard/routes`)
 
-## 📊 Database Schema
+- **AI Route Optimization**: Orden óptimo de visitas
+- **Map View**: Visualización de ruta en mapa
+- **Pre-Visit Briefings**: Contexto del cliente antes de visita
+- **Visit Tracking**: Log de visitas completadas
 
-### Prospect
-- Información básica (nombre, dirección, coordenadas)
-- Business info (tipo, cocina, precio, rating)
-- Sales intelligence (productos faltantes, score)
-- Lead tracking (estado, prioridad, notas)
+### 4. Data Collection (`/dashboard/scrape`)
 
-### Visit
-- Registro de visitas a prospects
-- Outcome, duración, pedidos
+- **Admin Interface**: Iniciar scraping jobs
+- **Job Monitoring**: Track progreso de scraping
+- **Data Sources**: Google Places, OCR, etc.
+- **Refresh Cycle**: Actualización mensual
 
-### Route
-- Rutas planificadas
-- Optimización automática
-- Tracking de progreso
+## 🔧 API Endpoints
 
-### Activity
-- Log de todas las interacciones
-- Calls, emails, visits, notes
+### Brands
+```
+GET  /api/brands              # List all brands
+```
 
-## 🔒 Consideraciones Legales
+### Coverage
+```
+GET  /api/coverage?brandId=X&city=Barcelona
+# Returns: penetration rate, city breakdown, product performance
+```
 
-⚠️ **IMPORTANTE**: El web scraping debe realizarse de forma responsable:
+### Opportunities
+```
+GET  /api/opportunities?brandId=X&city=Barcelona&minScore=60
+# Returns: venues without brand, opportunity scores, competitors
+```
 
-1. Respeta los `robots.txt` de cada sitio
-2. Implementa rate limiting adecuado
-3. No sobrecargues los servidores
-4. Considera usar APIs oficiales cuando estén disponibles
-5. Para producción, usa servicios profesionales como ScrapingBee
+### Prospects (Venues)
+```
+GET    /api/prospects         # List venues
+POST   /api/prospects         # Create venue
+GET    /api/prospects/:id     # Get venue details
+PATCH  /api/prospects/:id     # Update venue
+DELETE /api/prospects/:id     # Delete venue
+```
 
-## 🚀 Roadmap
+### Routes
+```
+GET  /api/routes              # List routes
+POST /api/routes              # Create optimized route
+```
 
-### Fase 1 (Completada)
-- ✅ Setup básico Next.js + Prisma
-- ✅ Scrapers para Google Places y TripAdvisor
-- ✅ Sistema de lead scoring
-- ✅ Dashboard UI básico
-- ✅ CRUD de prospects
+### Stats
+```
+GET  /api/stats               # Dashboard statistics
+```
 
-### Fase 2 (En Progreso)
-- 🔨 Integración completa de Glovo
-- 🔨 Route planning con mapa interactivo
-- 🔨 Mobile responsive
-- 🔨 Exportar datos a CSV/Excel
+## 💰 Costs
 
-### Fase 3 (Futuro)
-- 📋 App móvil para vendedores
-- 📋 Integración con CRM (Salesforce, HubSpot)
-- 📋 Machine learning para mejor scoring
-- 📋 Análisis de competencia
-- 📋 Reportes automáticos
+### Barcelona MVP (50 venues)
+```
+Google Places API:  50 × $0.017 = $0.85
+Cloud Vision OCR:   100 images   = $0 (free tier)
+Total:                            ~$1
+```
 
-## 🤝 Contribución
+### Production (10,000 venues)
+```
+Google Places:  10,000 × $0.017 = $170
+Cloud Vision:   20,000 images   = $30
+Total:                            ~$200/month
+```
 
-Las contribuciones son bienvenidas. Por favor:
+**Free tier**: Google Cloud Vision: 1,000 images/month gratis
 
-1. Fork el proyecto
-2. Crea una branch para tu feature
-3. Commit tus cambios
-4. Push a la branch
+## 🌍 Roadmap
+
+### Phase 1: Barcelona MVP ✅
+- [x] Google Places + OCR scraper
+- [x] Brand detection (Heineken, Mahou, Coca-Cola, etc.)
+- [x] Coverage dashboard
+- [x] Opportunities dashboard
+- [x] 50 venues scraped
+
+### Phase 2: Scale Barcelona
+- [ ] 200 venues
+- [ ] Manual corrections by sales reps
+- [ ] Competitor analysis
+- [ ] Territory mapping
+
+### Phase 3: Multi-City
+- [ ] Madrid
+- [ ] Valencia
+- [ ] Sevilla
+- [ ] Málaga
+
+### Phase 4: Advanced Features
+- [ ] AI route optimization
+- [ ] Pre-visit briefings
+- [ ] CRM integration
+- [ ] WhatsApp bot
+- [ ] Mobile app
+
+## 🤝 Contributing
+
+1. Fork el repositorio
+2. Crea tu feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit tus cambios (`git commit -m 'Add amazing feature'`)
+4. Push al branch (`git push origin feature/amazing-feature`)
 5. Abre un Pull Request
 
-## 📝 Licencia
+## 📚 Documentation
 
-MIT License - siéntete libre de usar este proyecto para tus propios fines.
+- [Setup Guide](./SETUP_BARCELONA.md) - Cómo empezar
+- [Architecture](./docs/ARCHITECTURE.md) - System design
+- [Brand Intelligence](./docs/BRAND_INTELLIGENCE_ARCHITECTURE.md) - Data model
+- [Barcelona MVP](./docs/BARCELONA_MVP.md) - MVP details
 
-## 🙏 Agradecimientos
+## 🆘 Support
 
-- Inspirado en [Dashmote](https://dashmote.com/)
-- Built with Next.js, Prisma, y otras increíbles herramientas open source
+- **Issues**: [GitHub Issues](https://github.com/Tombcn71/dashleads/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Tombcn71/dashleads/discussions)
 
-## 📧 Contacto
+## 📄 License
 
-¿Preguntas? ¿Sugerencias? Abre un issue en GitHub.
+MIT License - ver [LICENSE](./LICENSE)
+
+## 🙏 Acknowledgments
+
+- Inspired by [Dashmote](https://dashmote.com/)
+- Built with ❤️ for sales teams en España
 
 ---
 
-**Hecho con ❤️ para ayudar a los equipos de ventas españoles**
-
-
+**Made with 🍺 in Barcelona**

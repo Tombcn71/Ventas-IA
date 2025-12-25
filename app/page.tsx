@@ -50,7 +50,7 @@ export default function HomePage() {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                DashLeads
+                Ventas IA
               </span>
             </div>
             <div className="hidden md:flex items-center gap-8">
@@ -100,19 +100,16 @@ export default function HomePage() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-blue-500/30 backdrop-blur-xl border border-white/20 rounded-full text-white text-sm font-semibold mb-8 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
               <Zap className="w-4 h-4 text-yellow-300 animate-pulse" />
-              Inteligencia de Ubicación con IA
+              Copiloto de Ventas IA
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-              <span className="text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">Aumenta tus ventas en España con</span>
+            <h1 className="text-5xl md:text-7xl mb-6 leading-tight">
+              <span className="text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">Encuentra con IA clientes que</span>
               <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto] drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]">
-                el Poder de la IA
+                aún no venden tu producto
               </span>
             </h1>
             <p className="text-xl text-white/90 mb-10 leading-relaxed drop-shadow-lg">
-              DashLeads te muestra dónde gana tu marca en el mercado español, y dónde están las próximas grandes oportunidades. 
-              Desde restaurantes y bares en Madrid, Barcelona, Valencia y más ciudades españolas hasta plataformas de delivery 
-              como Glovo y Just Eat, nuestra IA convierte datos públicos desordenados en insights claros y accionables 
-              específicos para el mercado español.
+              Recopilamos datos públicos de 30.000+ restaurantes y bares en España. Nuestra IA convierte datos desordenados en rutas inteligentes y oportunidades de venta reales.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -137,21 +134,20 @@ export default function HomePage() {
         <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white -mt-10 z-10">
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8">
-              {/* Card 1: Asistente IA Ventas */}
+              {/* Card 1: Nosotros recopilamos */}
               <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 text-white" />
+                    <Search className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Asistente IA Ventas</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">Nosotros recopilamos</h3>
                 </div>
                 <p className="text-gray-600 mb-4 leading-relaxed">
-                  Tu Asistente de Ventas con IA para Ventas de Campo
+                  Datos públicos organizados inteligentemente
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  DashSalesAI transforma cómo prospectas, gestionas cuentas y cierras tratos en el campo. 
-                  Obtén insights de establecimientos en tiempo real, rutas inteligentes y recomendaciones 
-                  personalizadas entregadas directamente a WhatsApp.
+                  30.000+ restaurantes y bares en España. Datos públicos donde tu marca se menciona o no se menciona. 
+                  Todos los productos y marcas detectados. Datos actualizados cada mes.
                 </p>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link
@@ -163,21 +159,20 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Card 2: IA Leads */}
+              {/* Card 2: IA encuentra */}
               <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">IA Leads</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">IA encuentra</h3>
                 </div>
                 <p className="text-gray-600 mb-4 leading-relaxed font-semibold">
-                  Revela las mejores ubicaciones, siempre.
+                  Automáticamente locales sin tu producto
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  En promedio, el 50% del tiempo de ventas se desperdicia en prospección improductiva. 
-                  DashLeads reducirá ese número casi al 0% para ti. Encuentra los leads perfectos 
-                  en Madrid, Barcelona, Valencia y más ciudades españolas con precisión de IA.
+                  "Bares sin Heineken en Barcelona". "Restaurantes premium que sí venden Estrella". 
+                  Priorizados por rating, tráfico y presencia de competidores. Listos para visitar.
                 </p>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link
@@ -189,22 +184,20 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Card 3: Catchment Area Analysis */}
+              {/* Card 3: IA ayuda */}
               <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-white" />
+                    <Brain className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Análisis de Área de Captación</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">IA ayuda</h3>
                 </div>
                 <p className="text-gray-600 mb-4 leading-relaxed font-semibold">
-                  Inteligencia de ubicación para insights accionables
+                  De lead a venta en menos tiempo
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  El análisis de área de captación, impulsado por inteligencia de ubicación, proporciona 
-                  insights accionables que ayudan a las empresas a refinar sus estrategias. Al aprovechar 
-                  datos del mundo real, como demografía, densidad de población y actividad comercial en España, 
-                  las empresas pueden descubrir oportunidades sin explotar y optimizar sus esfuerzos de alcance.
+                  Ruta óptima para 10 visitas al día. Briefing pre-visita por local: qué venden, 
+                  quién es la competencia, sugerencias de pitch. 2x más ventas, 50% menos tiempo.
                 </p>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link
@@ -221,96 +214,7 @@ export default function HomePage() {
 
         
 
-      {/* Two Capabilities */}
-      <section id="soluciones" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Una Plataforma. Dos Capacidades Poderosas para España.
-            </h2>
-            <p className="text-xl text-gray-600">
-              DashLeads combina Inteligencia de Ubicación específica para el mercado español para ayudar a las empresas 
-              a desbloquear el crecimiento offline a partir de datos online de restaurantes, bares y cafeterías españolas.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* DashLeads */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">DashLeads</h3>
-              </div>
-              <p className="text-lg text-gray-600 mb-6">
-                Aumenta tus ventas en España dirigiendo los leads correctos de restaurantes, bares y cafeterías españolas.
-              </p>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Generación de leads con IA para el mercado español</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Insights de competencia en España</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Datos en tiempo real de establecimientos españoles</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Leads perfectos de Madrid, Barcelona, Valencia y más</span>
-                </li>
-              </ul>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700"
-              >
-                Saber más <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* DashSalesAI */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">DashSalesAI</h3>
-              </div>
-              <p className="text-lg text-gray-600 mb-6">
-                Tu Asistente de Ventas con IA para Ventas de Campo en España
-              </p>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Agente de generación de leads con IA para España</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Insights accionables del mercado español</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Rutas optimizadas para vendedores en España</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-gray-700">Mejora las ventas de campo en ciudades españolas</span>
-                </li>
-              </ul>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-700"
-              >
-                Saber más <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       
 
