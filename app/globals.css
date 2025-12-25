@@ -14,10 +14,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Custom utilities */
+.text-balance {
+  text-wrap: balance;
 }
 
 /* Leaflet map styling */
