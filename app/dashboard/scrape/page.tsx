@@ -36,6 +36,14 @@ export default function ScrapePage() {
 
       const data = await response.json()
       
+      console.log('Google API response:', data)
+      
+      if (data.error) {
+        setJob({ status: 'failed', error: `Google API error: ${data.error.message || JSON.stringify(data.error)}` })
+        setLoading(false)
+        return
+      }
+      
       if (!data.places || data.places.length === 0) {
         setJob({ status: 'completed', prospectsFound: 0, error: 'No restaurants found' })
         setLoading(false)

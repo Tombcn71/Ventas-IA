@@ -63,12 +63,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Start automatic menu analysis in background
+    // Return immediately, analysis happens in background
+    const response = NextResponse.json({ saved, analyzing: venueIds.length })
+    
+    // Start menu analysis AFTER response is sent
     if (venueIds.length > 0) {
-      analyzeVenueMenus(venueIds).catch(err => console.error('Background analysis:', err))
+      // Don't await - let it run in background
+      Promise.resolve().then(() => analyzeVenueMenus(venueIds))
     }
 
-    return NextResponse.json({ saved, analyzing: venueIds.length })
+    return response
   } catch (error) {
     console.error('Error saving scrape:', error)
     return NextResponse.json({ error: 'Error saving' }, { status: 500 })
