@@ -64,7 +64,7 @@ export default function HomePage() {
                 Dashboard
               </Link>
               <Link
-                href="/dashboard"
+                href="/auth/sign-up"
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
               >
                 Prueba Gratis
@@ -113,7 +113,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/dashboard"
+                href="/auth/sign-up"
                 className="group px-8 py-4 bg-gradient-to-r from-white to-white/90 text-purple-900 rounded-xl hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] hover:scale-105 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-2 backdrop-blur-sm"
               >
                 Prueba Gratis
@@ -229,7 +229,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/dashboard"
+              href="/auth/sign-up"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 rounded-xl hover:shadow-xl transition-all font-semibold text-lg"
             >
               Prueba Gratis

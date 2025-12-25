@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { authClient } from '@/lib/auth/client';
+import { NeonAuthUIProvider, UserButton } from '@neondatabase/neon-js/auth/react/ui';
 
 export const metadata: Metadata = {
   title: "VentasIA - Copiloto de Ventas IA",
@@ -12,8 +14,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className="antialiased">{children}</body>
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
+      <body className="antialiased">
+        <NeonAuthUIProvider
+          authClient={authClient}
+          redirectTo="/dashboard"
+          emailOTP
+        >
+          {children}
+        </NeonAuthUIProvider>
+      </body>
     </html>
   );
 }
