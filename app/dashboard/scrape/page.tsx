@@ -61,13 +61,19 @@ export default function ScrapePage() {
       })
 
       const result = await saveResponse.json()
-      setJob({ status: 'completed', prospectsFound: result.saved || data.places.length })
-      setLoading(false)
       
-      // Redirect to opportunities after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/dashboard/opportunities'
-      }, 2000)
+      // Start menu analysis
+      setJob({ status: 'analyzing', prospectsFound: result.saved })
+      
+      const analyzeResponse = await fetch('/api/analyze-all', { method: 'POST' })
+      const analyzeResult = await analyzeResponse.json()
+      
+      setJob({ 
+        status: 'completed', 
+        prospectsFound: result.saved,
+        analyzed: analyzeResult.analyzed
+      })
+      setLoading(false)
     } catch (error) {
       console.error('Error scraping:', error)
       setJob({ status: 'failed', error: String(error) })
