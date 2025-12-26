@@ -14,28 +14,57 @@ export async function POST(request: NextRequest) {
     }
 
     let saved = 0
-    const venueIds: string[] = []
+    
+    // Get active brands to detect
+    const brandsData = await sql`
+      SELECT DISTINCT b.id, b.name 
+      FROM brands b
+      INNER JOIN brand_products bp ON b.id = bp.brand_id
+      WHERE bp.active = true
+    `
+    const brandNames = brandsData.map((b: any) => b.name.toLowerCase())
 
     for (const place of places) {
       try {
         const venueId = uuidv4()
+        
         // Check if venue already exists
         const existing = await sql`
           SELECT id FROM venues WHERE name = ${place.displayName?.text || place.displayName} AND city = ${city} LIMIT 1
         `
         
         if (existing.length > 0) {
-          continue // Skip duplicates
+          continue
         }
 
-        // Get photo URLs if available
-        const photos = place.photos?.slice(0, 5).map((p: any) => p.name) || []
+        // AI Scoring (0-100)
+        let aiScore = 0
+        if (place.rating) aiScore += (place.rating / 5) * 40
+        if (place.userRatingCount) aiScore += Math.min((place.userRatingCount / 500) * 30, 30)
+        const priceMap: Record<string, number> = { 
+          'PRICE_LEVEL_INEXPENSIVE': 10, 
+          'PRICE_LEVEL_MODERATE': 20, 
+          'PRICE_LEVEL_EXPENSIVE': 30 
+        }
+        aiScore += priceMap[place.priceLevel] || 15
         
+        // Text mining in reviews - detect brands
+        const detectedBrands = new Set<string>()
+        place.reviews?.forEach((review: any) => {
+          const reviewText = review.text?.text?.toLowerCase() || review.originalText?.text?.toLowerCase() || ''
+          brandNames.forEach(brand => {
+            if (reviewText.includes(brand)) {
+              detectedBrands.add(brand)
+            }
+          })
+        })
+        
+        // Save venue
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
             latitude, longitude, venue_type, "businessType", source,
-            rating, price_level, "phoneNumber", website, platforms, status, "createdAt"
+            rating, price_level, "phoneNumber", website, platforms, status, "createdAt", "leadScore"
           )
           VALUES (
             ${venueId},
@@ -51,13 +80,28 @@ export async function POST(request: NextRequest) {
             ${place.priceLevel ? 2 : null},
             ${place.internationalPhoneNumber || null},
             ${place.websiteUri || null},
-            ${JSON.stringify({ photos })},
+            ${JSON.stringify({ openingHours: place.regularOpeningHours })},
             'new',
-            NOW()
+            NOW(),
+            ${Math.round(aiScore)}
           )
         `
+        
+        // Save detected brands
+        for (const brandName of detectedBrands) {
+          const brand = brandsData.find((b: any) => b.name.toLowerCase() === brandName)
+          if (brand) {
+            const products = await sql`SELECT id FROM brand_products WHERE brand_id = ${brand.id} LIMIT 1`
+            if (products.length > 0) {
+              await sql`
+                INSERT INTO product_availability (id, venue_id, brand_product_id, is_available, detected_at)
+                VALUES (${uuidv4()}, ${venueId}, ${products[0].id}, true, NOW())
+              `
+            }
+          }
+        }
+        
         saved++
-        if (photos.length > 0) venueIds.push(venueId)
       } catch (err) {
         console.error('Error saving venue:', err)
       }
