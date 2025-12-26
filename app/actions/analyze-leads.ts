@@ -5,22 +5,30 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 export async function getLeadIntelligence(reviews: string[], myProducts: string[]) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
   const prompt = `Je bent een sales-expert voor de Spaanse horeca.
-Analyseer de volgende reviews van een restaurant/bar:
+Analyseer deze reviews van een restaurant/bar:
 ---
 ${reviews.join('\n')}
 ---
-Mijn verkoper verkoopt deze producten: ${myProducts.join(', ')}.
 
-Geef een JSON antwoord met:
-1. "match_score": 0-100 gebaseerd op hoe goed mijn producten passen bij hun tekortkomingen.
-2. "competitor_detected": Welke andere merken worden genoemd?
-3. "pain_points": Waar klagen klanten over (prijs, kwaliteit, aanbod)?
-4. "perfect_pitch": Een openingszin van max 20 woorden die de verkoper kan gebruiken.
+Mijn verkoper verkoopt: ${myProducts.join(', ')}.
 
-Return ONLY valid JSON.`
+ZOEK NAAR GAPS:
+- Worden mijn producten NIET genoemd? +40 score
+- Worden concurrenten genoemd? +30 score
+- Klachten over huidige aanbod? +20 score
+
+Geef JSON:
+{
+  "match_score": 0-100,
+  "competitor_detected": ["merk1"],
+  "pain_points": ["klacht1"],
+  "perfect_pitch": "Max 20 woorden sales opening"
+}
+
+ONLY valid JSON.`
 
   try {
     const result = await model.generateContent(prompt)

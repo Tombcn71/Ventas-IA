@@ -87,7 +87,20 @@ export async function POST(request: NextRequest) {
           r.text?.text || r.originalText?.text || ''
         ).filter(Boolean) || []
         
-        // Save venue with detected products AND reviews
+        // Gemini Intelligence (inline tijdens scrape)
+        let geminiInsight = null
+        if (reviewsText.length > 0 && brandsData.length > 0) {
+          const { getLeadIntelligence } = await import('@/app/actions/analyze-leads')
+          geminiInsight = await getLeadIntelligence(
+            reviewsText.slice(0, 5), 
+            brandsData.map(b => b.name)
+          )
+          if (geminiInsight) {
+            matchScore = geminiInsight.match_score
+          }
+        }
+        
+        // Save venue with detected products, reviews AND AI insight
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
@@ -110,9 +123,13 @@ export async function POST(request: NextRequest) {
             ${place.internationalPhoneNumber || null},
             ${place.websiteUri || null},
             ${place.userRatingCount || null},
-            ${JSON.stringify({ openingHours: place.regularOpeningHours, reviews: reviewsText })},
+            ${JSON.stringify({ 
+              openingHours: place.regularOpeningHours, 
+              reviews: reviewsText,
+              aiInsight: geminiInsight
+            })},
             ${JSON.stringify(Array.from(detectedProducts))},
-            ${reviewsText.join('\n\n').substring(0, 5000)},
+            ${geminiInsight?.perfect_pitch || ''},
             'new',
             NOW(),
             ${Math.round(matchScore)}
