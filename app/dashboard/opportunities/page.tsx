@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MapPin, Star } from 'lucide-react'
+import { MapPin, Star, ChevronRight } from 'lucide-react'
+
+const CITIES = ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Bilbao']
 
 export default function OpportunitiesPage() {
   const [products, setProducts] = useState<any[]>([])
