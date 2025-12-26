@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
           const reviewsText = platforms?.reviews || []
           
           if (reviewsText.length === 0) {
-            return { ...lead, matchScore: lead.sales_score, perfectPitch: `Perfecto para ${selectedProducts[0]}.` }
+            return { ...lead, matchScore: lead.sales_score, perfectPitch: null, currentProducts }
           }
           
           const intelligence = await getLeadIntelligence(reviewsText.slice(0, 10), selectedProducts)
