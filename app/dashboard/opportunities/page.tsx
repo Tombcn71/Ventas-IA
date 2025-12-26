@@ -26,61 +26,6 @@ export default function OpportunitiesPage() {
     }
   }
 
-  const searchMatches = async () => {
-    if (selectedProducts.length === 0) return
-    
-    setLoading(true)
-    try {
-      const params = new URLSearchParams({
-        city: selectedCity,
-        products: selectedProducts.join(',')
-      })
-      const response = await fetch(`/api/opportunities/search?${params}`)
-      const data = await response.json()
-      setLeads(data.leads || [])
-    } catch (error) {
-      console.error('Error searching:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const toggleProduct = (productName: string) => {
-    setSelectedProducts(prev => 
-      prev.includes(productName) 
-        ? prev.filter(p => p !== productName)
-        : [...prev, productName]
-    )
-  }
-
-'use client'
-
-import { useState, useEffect } from 'react'
-import { MapPin, Star, ChevronRight } from 'lucide-react'
-
-const CITIES = ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Bilbao']
-
-export default function OpportunitiesPage() {
-  const [products, setProducts] = useState<any[]>([])
-  const [selectedCity, setSelectedCity] = useState('Madrid')
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-  const [leads, setLeads] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch('/api/brands/manage')
-      const data = await response.json()
-      setProducts(data.filter((p: any) => p.active))
-    } catch (error) {
-      console.error('Error fetching products:', error)
-    }
-  }
-
   const toggleProduct = (productName: string) => {
     setSelectedProducts(prev => 
       prev.includes(productName) 
