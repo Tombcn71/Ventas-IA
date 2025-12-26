@@ -253,159 +253,82 @@ function DashmoteCard({ lead }: { lead: any }) {
   
   const openStatus = isOpenNow()
   
-  const statusColors: any = {
-    new: 'bg-blue-100 text-blue-800',
-    contacted: 'bg-yellow-100 text-yellow-800',
-    interested: 'bg-green-100 text-green-800',
-    not_interested: 'bg-gray-100 text-gray-800',
-    customer: 'bg-purple-100 text-purple-800',
-  }
-
-  const priorityColors: any = {
-    high: 'bg-red-100 text-red-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    low: 'bg-gray-100 text-gray-800',
-  }
-
-  const missingProducts = Array.isArray(prospect.missingProducts)
-    ? prospect.missingProducts
-    : []
+  const score = lead.leadScore || 0
+  const scoreColor = score >= 80 ? 'text-emerald-500' : score >= 60 ? 'text-blue-500' : 'text-amber-500'
+  const scoreBorder = score >= 80 ? 'border-emerald-500' : score >= 60 ? 'border-blue-500' : 'border-amber-500'
   
-  const analyzeMenu = async () => {
-    setAnalyzing(true)
-    try {
-      const response = await fetch('/api/analyze-menus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ venueId: prospect.id })
-      })
-      const data = await response.json()
-      setMenuResults(data)
-    } catch (error) {
-      console.error('Error analyzing menu:', error)
-    } finally {
-      setAnalyzing(false)
-    }
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <div className="flex items-start gap-3 mb-2">
-            <h3 className="text-xl font-bold text-gray-900">{prospect.name}</h3>
-            <span
-              className={`px-2 py-1 rounded text-xs font-semibold ${
-                statusColors[prospect.status]
-              }`}
-            >
-              {prospect.status}
-            </span>
-            <span
-              className={`px-2 py-1 rounded text-xs font-semibold ${
-                priorityColors[prospect.priority]
-              }`}
-            >
-              {prospect.priority}
-            </span>
+    <div className="bg-white rounded-lg border hover:shadow-lg transition p-5 flex gap-4">
+      {/* Left: Circular Score */}
+      <div className="flex-shrink-0">
+        <div className={`relative w-20 h-20 rounded-full border-4 ${scoreBorder} flex items-center justify-center bg-white`}>
+          <div className="text-center">
+            <div className={`text-2xl font-bold ${scoreColor}`}>{score}</div>
+            <div className="text-xs text-gray-500">Score</div>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              {prospect.address}, {prospect.city}
-            </div>
-            {prospect.phoneNumber && (
-              <div className="flex items-center gap-1">
-                <Phone className="w-4 h-4" />
-                {prospect.phoneNumber}
-              </div>
-            )}
-            {prospect.rating && (
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                {prospect.rating} ({prospect.reviewCount} reviews)
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="px-3 py-1 bg-gray-100 rounded-full">
-              {prospect.businessType}
-            </span>
-            {prospect.cuisine && (
-              <span className="px-3 py-1 bg-gray-100 rounded-full">
-                {prospect.cuisine}
-              </span>
-            )}
-            {prospect.priceRange && (
-              <span className="px-3 py-1 bg-gray-100 rounded-full">
-                {prospect.priceRange}
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-primary-600" />
-            <span className="text-2xl font-bold text-primary-600">
-              {prospect.leadScore}
-            </span>
-          </div>
-          <div className="text-xs text-gray-500">Lead Score</div>
         </div>
       </div>
 
-      {missingProducts.length > 0 && (
-        <div className="mb-4 p-4 bg-green-50 rounded-lg">
-          <div className="font-semibold text-green-900 mb-2 text-sm">
-            🎯 Oportunidades ({missingProducts.length})
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {missingProducts.slice(0, 5).map((product: any, index: number) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-white rounded-full text-sm font-medium text-gray-700 border border-green-200"
-              >
-                {product.brand || product}
+      {/* Main Content */}
+      <div className="flex-1">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            {/* Header with name and status */}
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-lg font-bold text-gray-900">{lead.name}</h3>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                openStatus ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+              }`}>
+                {openStatus ? 'Abierto' : 'Cerrado'}
               </span>
-            ))}
-            {missingProducts.length > 5 && (
-              <span className="px-3 py-1 text-sm text-gray-600">
-                +{missingProducts.length - 5} más
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+            
+            {/* Address */}
+            <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
+              <MapPin className="w-4 h-4" />
+              {lead.address}
+            </div>
 
-      <div className="flex justify-between items-center pt-4 border-t">
-        <div className="flex gap-2">
-          {prospect.website && (
-            <a
-              href={prospect.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
-            >
-              Website <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
-          {prospect.sourceUrl && (
-            <a
-              href={prospect.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-gray-600 hover:text-gray-700 flex items-center gap-1"
-            >
-              Fuente <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
+            {/* Type Tags */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                {lead.businessType === 'restaurant' ? 'Eating Place' : 'Drinking Place'}
+              </span>
+              {lead.rating && (
+                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  {lead.rating}
+                </span>
+              )}
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                {lead.price_level ? '€'.repeat(lead.price_level) : '€€'}
+              </span>
+            </div>
+
+            {/* Potential Bar */}
+            <div className="mb-2">
+              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <span className="font-medium">Potential</span>
+                <span>{score}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className={`h-2.5 rounded-full transition-all ${
+                    score >= 80 ? 'bg-emerald-500' : score >= 60 ? 'bg-blue-500' : 'bg-amber-500'
+                  }`}
+                  style={{width: `${Math.min(score, 100)}%`}}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href={`/dashboard/prospects/${lead.id}`}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1"
+          >
+            Ver <ChevronRight className="w-4 h-4" />
+          </Link>
         </div>
-        <Link
-          href={`/dashboard/prospects/${prospect.id}`}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition flex items-center gap-1 text-sm"
-        >
-          Ver Detalles <ChevronRight className="w-4 h-4" />
-        </Link>
       </div>
     </div>
   )
