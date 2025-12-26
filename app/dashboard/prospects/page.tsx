@@ -243,9 +243,15 @@ export default function ProspectsPage() {
   )
 }
 
-function ProspectCard({ prospect }: { prospect: any }) {
-  const [analyzing, setAnalyzing] = useState(false)
-  const [menuResults, setMenuResults] = useState<any>(null)
+function DashmoteCard({ lead }: { lead: any }) {
+  // Check if venue is open now
+  const isOpenNow = () => {
+    // Simplified - can be enhanced with opening_hours data
+    const hour = new Date().getHours()
+    return hour >= 10 && hour < 23
+  }
+  
+  const openStatus = isOpenNow()
   
   const statusColors: any = {
     new: 'bg-blue-100 text-blue-800',
