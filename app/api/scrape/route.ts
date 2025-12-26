@@ -82,13 +82,18 @@ export async function POST(request: NextRequest) {
         // Populariteit (20pt)
         if (place.rating >= 4.0 && place.userRatingCount >= 50) matchScore += 20
         
-        // Save venue with detected products
+        // Extract reviews text
+        const reviewsText = place.reviews?.map((r: any) => 
+          r.text?.text || r.originalText?.text || ''
+        ).filter(Boolean) || []
+        
+        // Save venue with detected products AND reviews
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
             latitude, longitude, venue_type, "businessType", source,
-            rating, price_level, "phoneNumber", website, 
-            platforms, "currentProducts", status, "createdAt", "leadScore"
+            rating, price_level, "phoneNumber", website, "reviewCount",
+            platforms, "currentProducts", notes, status, "createdAt", "leadScore"
           )
           VALUES (
             ${venueId},
@@ -97,15 +102,17 @@ export async function POST(request: NextRequest) {
             ${city},
             ${place.location?.latitude || 0},
             ${place.location?.longitude || 0},
-            types.includes('bar') ? 'bar' : 'restaurant',
-            types.includes('bar') ? 'bar' : 'restaurant',
+            ${types.includes('bar') ? 'bar' : 'restaurant'},
+            ${types.includes('bar') ? 'bar' : 'restaurant'},
             'google_places',
             ${place.rating || null},
             ${place.priceLevel ? 2 : null},
             ${place.internationalPhoneNumber || null},
             ${place.websiteUri || null},
-            ${JSON.stringify({ openingHours: place.regularOpeningHours })},
+            ${place.userRatingCount || null},
+            ${JSON.stringify({ openingHours: place.regularOpeningHours, reviews: reviewsText })},
             ${JSON.stringify(Array.from(detectedProducts))},
+            ${reviewsText.join('\n\n').substring(0, 5000)},
             'new',
             NOW(),
             ${Math.round(matchScore)}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
+import { getLeadIntelligence } from '@/app/actions/analyze-leads'
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,31 +54,45 @@ export async function GET(request: NextRequest) {
       LIMIT 50
     `
 
-    // Add AI sales tips
-    const leadsWithTips = leads.map((lead: any) => {
-      let tip = ''
-      const currentProducts = typeof lead.currentProducts === 'string' 
-        ? JSON.parse(lead.currentProducts) 
-        : (lead.currentProducts || [])
-      
-      if (lead.sales_score >= 95) {
-        tip = `🔥 Alta popularidad (${lead.reviewCount}+ reviews) pero sin ${selectedProducts[0]}. Excelente oportunidad.`
-      } else if (lead.sales_score === 80 && currentProducts.length > 0) {
-        tip = `💡 Switch Opportunity: Actualmente vende ${currentProducts[0]} pero no ${selectedProducts[0]}.`
-      } else if (lead.businessType === 'bar') {
-        tip = `🍺 Bar con buena ubicación. Perfecto para ${selectedProducts[0]}.`
-      } else {
-        tip = `📍 Restaurante bien valorado en ${lead.city}.`
-      }
-      
-      return {
-        ...lead,
-        salesTip: tip,
-        currentProducts
-      }
-    })
+    // Get reviews for each lead and generate AI insights
+    const leadsWithIntelligence = await Promise.all(
+      leads.slice(0, 10).map(async (lead: any) => {
+        try {
+          // Get actual reviews from Google (would need to fetch or store them)
+          // For now, generate intelligence based on available data
+          const currentProducts = typeof lead.currentProducts === 'string' 
+            ? JSON.parse(lead.currentProducts) 
+            : (lead.currentProducts || [])
+          
+          // Get real reviews from platforms storage
+          const platforms = typeof lead.platforms === 'string' ? JSON.parse(lead.platforms) : lead.platforms
+          const reviewsText = platforms?.reviews || []
+          
+          if (reviewsText.length === 0) {
+            return { ...lead, matchScore: lead.sales_score, perfectPitch: `Perfecto para ${selectedProducts[0]}.` }
+          }
+          
+          const intelligence = await getLeadIntelligence(reviewsText.slice(0, 10), selectedProducts)
+          
+          return {
+            ...lead,
+            matchScore: intelligence.match_score || lead.sales_score,
+            competitorDetected: intelligence.competitor_detected || currentProducts,
+            painPoints: intelligence.pain_points || [],
+            perfectPitch: intelligence.perfect_pitch,
+            currentProducts
+          }
+        } catch (error) {
+          return {
+            ...lead,
+            matchScore: lead.sales_score,
+            perfectPitch: `Hola, vengo a presentarte ${selectedProducts[0]}.`
+          }
+        }
+      })
+    )
 
-    return NextResponse.json({ leads: leadsWithTips })
+    return NextResponse.json({ leads: leadsWithIntelligence })
   } catch (error) {
     console.error('Opportunities search error:', error)
     return NextResponse.json({ error: 'Search failed' }, { status: 500 })
