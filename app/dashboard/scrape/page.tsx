@@ -64,27 +64,10 @@ export default function ScrapePage() {
 
       const result = await saveResponse.json()
       
-      // Start menu analysis in batches
-      setJob({ status: 'analyzing', prospectsFound: result.saved })
-      setProgress({ current: 0, total: result.saved })
-      
-      let totalAnalyzed = 0
-      const batchSize = 10
-      
-      while (totalAnalyzed < result.saved) {
-        const analyzeResponse = await fetch('/api/analyze-all', { method: 'POST' })
-        const analyzeResult = await analyzeResponse.json()
-        
-        totalAnalyzed += analyzeResult.analyzed || 0
-        setProgress({ current: totalAnalyzed, total: result.saved })
-        
-        if (analyzeResult.analyzed === 0) break // No more to analyze
-      }
-      
       setJob({ 
         status: 'completed', 
         prospectsFound: result.saved,
-        analyzed: totalAnalyzed
+        message: `✅ ${result.saved} leads guardados y analizados con Gemini`
       })
       setLoading(false)
     } catch (error) {
