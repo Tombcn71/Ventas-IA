@@ -184,7 +184,7 @@ function OpportunityCard({ lead, missingProducts }: { lead: any, missingProducts
             </div>
 
             {/* Potential Bar */}
-            <div>
+            <div className="mb-3">
               <div className="flex justify-between text-xs text-gray-600 mb-1">
                 <span className="font-medium">Opportunity Score</span>
                 <span>{score}%</span>
@@ -198,6 +198,14 @@ function OpportunityCard({ lead, missingProducts }: { lead: any, missingProducts
                 ></div>
               </div>
             </div>
+
+            {/* AI Perfect Pitch */}
+            {lead.perfectPitch && (
+              <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <div className="text-xs font-semibold text-blue-900 mb-1">🎯 Perfect Pitch</div>
+                <div className="text-sm text-blue-800 italic">"{lead.perfectPitch}"</div>
+              </div>
+            )}
           </div>
 
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1">
