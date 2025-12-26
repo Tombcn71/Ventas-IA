@@ -29,12 +29,7 @@ Return ONLY valid JSON.`
     return JSON.parse(cleaned)
   } catch (error) {
     console.error('Gemini analysis error:', error)
-    return {
-      match_score: 50,
-      competitor_detected: [],
-      pain_points: [],
-      perfect_pitch: 'Hola, quiero presentarte nuestro producto.'
-    }
+    return null
   }
 }
 
