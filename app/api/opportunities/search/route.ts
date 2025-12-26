@@ -83,10 +83,11 @@ export async function GET(request: NextRequest) {
             currentProducts
           }
         } catch (error) {
+          console.error('Error analyzing lead:', error)
           return {
             ...lead,
             matchScore: lead.sales_score,
-            perfectPitch: `Hola, vengo a presentarte ${selectedProducts[0]}.`
+            perfectPitch: null
           }
         }
       })
