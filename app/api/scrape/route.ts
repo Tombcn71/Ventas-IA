@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           const { getLeadIntelligence } = await import('@/app/actions/analyze-leads')
           geminiInsight = await getLeadIntelligence(
             reviewsText.slice(0, 5), 
-            brandsData.map(b => b.name)
+            brandsData.map((b: any) => b.name)
           )
           if (geminiInsight) {
             matchScore = geminiInsight.match_score
