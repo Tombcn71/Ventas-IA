@@ -151,66 +151,6 @@ export default function ProspectsPage() {
           </p>
         </div>
 
-        {/* Filters - keeping for compatibility but hidden */}
-        <div className="hidden">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre o dirección..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <select
-              value={filters.city}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Todas las ciudades</option>
-              <option value="Madrid">Madrid</option>
-              <option value="Barcelona">Barcelona</option>
-              <option value="Valencia">Valencia</option>
-              <option value="Sevilla">Sevilla</option>
-              <option value="Málaga">Málaga</option>
-            </select>
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Todos los estados</option>
-              <option value="new">Nuevo</option>
-              <option value="contacted">Contactado</option>
-              <option value="interested">Interesado</option>
-              <option value="customer">Cliente</option>
-            </select>
-            <select
-              value={filters.priority}
-              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Todas las prioridades</option>
-              <option value="high">Alta</option>
-              <option value="medium">Media</option>
-              <option value="low">Baja</option>
-            </select>
-            <select
-              value={filters.minScore}
-              onChange={(e) => setFilters({ ...filters, minScore: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Cualquier score</option>
-              <option value="80">Score &gt; 80</option>
-              <option value="60">Score &gt; 60</option>
-              <option value="40">Score &gt; 40</option>
-            </select>
-          </div>
-        </div>
 
         {/* Results */}
         {loading ? (
