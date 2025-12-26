@@ -31,9 +31,6 @@ export default function ProspectsPage() {
     try {
       const params = new URLSearchParams()
       if (filters.city) params.append('city', filters.city)
-      if (filters.status) params.append('status', filters.status)
-      if (filters.priority) params.append('priority', filters.priority)
-      if (filters.minScore) params.append('minScore', filters.minScore)
 
       const response = await fetch(`/api/prospects?${params}`)
       const data = await response.json()
