@@ -54,44 +54,23 @@ export async function GET(request: NextRequest) {
       LIMIT 50
     `
 
-    // Get reviews for each lead and generate AI insights
-    const leadsWithIntelligence = await Promise.all(
-      leads.slice(0, 10).map(async (lead: any) => {
-        try {
-          // Get actual reviews from Google (would need to fetch or store them)
-          // For now, generate intelligence based on available data
-          const currentProducts = typeof lead.currentProducts === 'string' 
-            ? JSON.parse(lead.currentProducts) 
-            : (lead.currentProducts || [])
-          
-          // Get real reviews from platforms storage
-          const platforms = typeof lead.platforms === 'string' ? JSON.parse(lead.platforms) : lead.platforms
-          const reviewsText = platforms?.reviews || []
-          
-          if (reviewsText.length === 0) {
-            return { ...lead, matchScore: lead.sales_score, perfectPitch: null, currentProducts }
-          }
-          
-          const intelligence = await getLeadIntelligence(reviewsText.slice(0, 10), selectedProducts)
-          
-          return {
-            ...lead,
-            matchScore: intelligence.match_score || lead.sales_score,
-            competitorDetected: intelligence.competitor_detected || currentProducts,
-            painPoints: intelligence.pain_points || [],
-            perfectPitch: intelligence.perfect_pitch,
-            currentProducts
-          }
-        } catch (error) {
-          console.error('Error analyzing lead:', error)
-          return {
-            ...lead,
-            matchScore: lead.sales_score,
-            perfectPitch: null
-          }
-        }
-      })
-    )
+    // Extract AI insights already stored during scraping
+    const leadsWithIntelligence = leads.map((lead: any) => {
+      const platforms = typeof lead.platforms === 'string' ? JSON.parse(lead.platforms) : lead.platforms
+      const aiInsight = platforms?.aiInsight || null
+      const currentProducts = typeof lead.currentProducts === 'string' 
+        ? JSON.parse(lead.currentProducts) 
+        : (lead.currentProducts || [])
+      
+      return {
+        ...lead,
+        matchScore: aiInsight?.match_score || lead.sales_score,
+        competitorDetected: aiInsight?.competitor_detected || currentProducts,
+        painPoints: aiInsight?.pain_points || [],
+        perfectPitch: lead.notes || aiInsight?.perfect_pitch || null,
+        currentProducts
+      }
+    })
 
     return NextResponse.json({ leads: leadsWithIntelligence })
   } catch (error) {
