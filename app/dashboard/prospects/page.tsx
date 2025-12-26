@@ -218,30 +218,25 @@ export default function ProspectsPage() {
         {/* Results */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Cargando prospects...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Cargando leads...</p>
           </div>
-        ) : prospects.length === 0 ? (
+        ) : filteredProspects.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-600 text-lg">No se encontraron prospects</p>
+            <p className="text-gray-600 text-lg">No se encontraron leads</p>
             <Link
               href="/dashboard/scrape"
-              className="mt-4 inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              className="mt-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Iniciar Scraping
+              Scrape Nuevos Leads
             </Link>
           </div>
         ) : (
-          <>
-            <div className="mb-4 text-sm text-gray-600">
-              Mostrando {prospects.length} prospect(s)
-            </div>
-            <div className="grid gap-4">
-              {prospects.map((prospect) => (
-                <ProspectCard key={prospect.id} prospect={prospect} />
-              ))}
-            </div>
-          </>
+          <div className="space-y-3">
+            {filteredProspects.map((prospect) => (
+              <DashmoteCard key={prospect.id} lead={prospect} />
+            ))}
+          </div>
         )}
       </div>
     </div>
