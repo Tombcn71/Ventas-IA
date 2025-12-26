@@ -1,62 +1,54 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, MapPin, Phone, Star, Target } from 'lucide-react'
+import { MapPin, Star } from 'lucide-react'
 
 export default function OpportunitiesPage() {
-  const [brands, setBrands] = useState<any[]>([])
-  const [selectedBrand, setSelectedBrand] = useState('')
-  const [city, setCity] = useState('Barcelona')
-  const [venues, setVenues] = useState<any[]>([])
+  const [products, setProducts] = useState<any[]>([])
+  const [selectedCity, setSelectedCity] = useState('Madrid')
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [leads, setLeads] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [analysisStatus, setAnalysisStatus] = useState<any>(null)
 
   useEffect(() => {
-    fetchBrands()
-    fetchAnalysisStatus()
-    // Poll status every 10 seconds
-    const interval = setInterval(fetchAnalysisStatus, 10000)
-    return () => clearInterval(interval)
+    fetchProducts()
   }, [])
 
-  const fetchAnalysisStatus = async () => {
-    try {
-      const response = await fetch('/api/menu-analysis-status')
-      const data = await response.json()
-      setAnalysisStatus(data)
-    } catch (error) {
-      console.error('Error fetching status:', error)
-    }
-  }
-
-  useEffect(() => {
-    if (selectedBrand) {
-      searchOpportunities()
-    }
-  }, [selectedBrand, city])
-
-  const fetchBrands = async () => {
+  const fetchProducts = async () => {
     try {
       const response = await fetch('/api/brands/manage')
       const data = await response.json()
-      setBrands(data.filter((b: any) => b.active))
-      if (data.length > 0) setSelectedBrand(data[0].name)
+      setProducts(data.filter((p: any) => p.active))
     } catch (error) {
-      console.error('Error fetching brands:', error)
+      console.error('Error fetching products:', error)
     }
   }
 
-  const searchOpportunities = async () => {
+  const searchMatches = async () => {
+    if (selectedProducts.length === 0) return
+    
     setLoading(true)
     try {
-      const response = await fetch(`/api/search/brand?brand=${selectedBrand}&city=${city}&mode=without`)
+      const params = new URLSearchParams({
+        city: selectedCity,
+        products: selectedProducts.join(',')
+      })
+      const response = await fetch(`/api/opportunities/search?${params}`)
       const data = await response.json()
-      setVenues(data.venues || [])
+      setLeads(data.leads || [])
     } catch (error) {
       console.error('Error searching:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const toggleProduct = (productName: string) => {
+    setSelectedProducts(prev => 
+      prev.includes(productName) 
+        ? prev.filter(p => p !== productName)
+        : [...prev, productName]
+    )
   }
 
   return (
