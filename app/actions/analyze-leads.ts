@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 export async function getLeadIntelligence(reviews: string[], myProducts: string[]) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
 
   const prompt = `Je bent een sales-expert voor de Spaanse horeca.
 Analyseer deze reviews van een restaurant/bar:
