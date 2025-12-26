@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Search,
-  Filter,
   MapPin,
   Phone,
   Star,
-  TrendingUp,
   ChevronRight,
   ExternalLink,
 } from 'lucide-react'
@@ -19,9 +17,9 @@ export default function ProspectsPage() {
   const [filters, setFilters] = useState({
     search: '',
     city: '',
-    status: '',
-    priority: '',
-    minScore: '',
+    minScore: 0,
+    maxScore: 100,
+    priceLevel: '',
   })
 
   useEffect(() => {
@@ -66,18 +64,98 @@ export default function ProspectsPage() {
     }
   }
 
+  const filteredProspects = prospects.filter(p => {
+    if (p.leadScore < filters.minScore || p.leadScore > filters.maxScore) return false
+    if (filters.city && p.city !== filters.city) return false
+    if (filters.priceLevel && p.price_level !== parseInt(filters.priceLevel)) return false
+    if (filters.search) {
+      const search = filters.search.toLowerCase()
+      return p.name?.toLowerCase().includes(search) || p.address?.toLowerCase().includes(search)
+    }
+    return true
+  })
+
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div className="w-80 bg-white border-r p-6 overflow-y-auto">
+        <h2 className="text-lg font-bold mb-6">Filtros</h2>
+        
+        {/* AI Score Range */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">Prospect Score</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="number"
+              value={filters.minScore}
+              onChange={(e) => setFilters({...filters, minScore: parseInt(e.target.value) || 0})}
+              className="w-20 px-2 py-1 border rounded"
+              placeholder="0"
+            />
+            <span>-</span>
+            <input
+              type="number"
+              value={filters.maxScore}
+              onChange={(e) => setFilters({...filters, maxScore: parseInt(e.target.value) || 100})}
+              className="w-20 px-2 py-1 border rounded"
+              placeholder="100"
+            />
+          </div>
+        </div>
+
+        {/* Price Level */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">Nivel de Precio</label>
+          <select
+            value={filters.priceLevel}
+            onChange={(e) => setFilters({...filters, priceLevel: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg"
+          >
+            <option value="">Todos</option>
+            <option value="1">$ Económico</option>
+            <option value="2">$$ Moderado</option>
+            <option value="3">$$$ Caro</option>
+          </select>
+        </div>
+
+        {/* City */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">Ciudad</label>
+          <select
+            value={filters.city}
+            onChange={(e) => setFilters({...filters, city: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg"
+          >
+            <option value="">Todas</option>
+            <option value="Barcelona">Barcelona</option>
+            <option value="Madrid">Madrid</option>
+          </select>
+        </div>
+
+        {/* Search */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Buscar</label>
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => setFilters({...filters, search: e.target.value})}
+            placeholder="Nombre o dirección..."
+            className="w-full px-3 py-2 border rounded-lg"
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Prospects</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Leads Dashboard</h1>
           <p className="text-gray-600">
-            Gestiona y explora oportunidades de venta
+            {filteredProspects.length} oportunidades encontradas
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        {/* Filters - keeping for compatibility but hidden */}
+        <div className="hidden">
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
