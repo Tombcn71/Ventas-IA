@@ -48,23 +48,47 @@ export async function POST(request: NextRequest) {
         }
         aiScore += priceMap[place.priceLevel] || 15
         
-        // Text mining in reviews - detect brands
-        const detectedBrands = new Set<string>()
-        place.reviews?.forEach((review: any) => {
-          const reviewText = review.text?.text?.toLowerCase() || review.originalText?.text?.toLowerCase() || ''
-          brandNames.forEach(brand => {
-            if (reviewText.includes(brand)) {
-              detectedBrands.add(brand)
-            }
-          })
-        })
+        // Text mining in reviews - detect ALL products/keywords
+        const detectedProducts = new Set<string>()
+        const allReviewsText = place.reviews?.map((r: any) => 
+          r.text?.text || r.originalText?.text || ''
+        ).join(' ').toLowerCase() || ''
         
-        // Save venue
+        // Check each brand and its keywords
+        for (const brandData of brandsData) {
+          const brand = await sql`SELECT keywords FROM brand_products WHERE brand_id = ${brandData.id} LIMIT 1`
+          const keywords = brand[0]?.keywords || []
+          const keywordList = typeof keywords === 'string' ? JSON.parse(keywords) : keywords
+          
+          // Check if brand name or any keyword appears in reviews
+          const brandMatch = allReviewsText.includes(brandData.name.toLowerCase()) ||
+            keywordList.some((kw: string) => allReviewsText.includes(kw.toLowerCase()))
+          
+          if (brandMatch) {
+            detectedProducts.add(brandData.name)
+          }
+        }
+        
+        // Calculate AI Match Score (0-100)
+        let matchScore = 0
+        
+        // Product Match (50pt)
+        if (detectedProducts.size > 0) matchScore += 50
+        
+        // Segment Match (30pt) - bar matches beer, restaurant matches food
+        const types = place.types || []
+        if (types.includes('bar') || types.includes('night_club')) matchScore += 30
+        
+        // Populariteit (20pt)
+        if (place.rating >= 4.0 && place.userRatingCount >= 50) matchScore += 20
+        
+        // Save venue with detected products
         await sql`
           INSERT INTO venues (
             id, name, address, city, 
             latitude, longitude, venue_type, "businessType", source,
-            rating, price_level, "phoneNumber", website, platforms, status, "createdAt", "leadScore"
+            rating, price_level, "phoneNumber", website, 
+            platforms, "currentProducts", status, "createdAt", "leadScore"
           )
           VALUES (
             ${venueId},
@@ -73,23 +97,24 @@ export async function POST(request: NextRequest) {
             ${city},
             ${place.location?.latitude || 0},
             ${place.location?.longitude || 0},
-            'restaurant',
-            'restaurant',
+            types.includes('bar') ? 'bar' : 'restaurant',
+            types.includes('bar') ? 'bar' : 'restaurant',
             'google_places',
             ${place.rating || null},
             ${place.priceLevel ? 2 : null},
             ${place.internationalPhoneNumber || null},
             ${place.websiteUri || null},
             ${JSON.stringify({ openingHours: place.regularOpeningHours })},
+            ${JSON.stringify(Array.from(detectedProducts))},
             'new',
             NOW(),
-            ${Math.round(aiScore)}
+            ${Math.round(matchScore)}
           )
         `
         
-        // Save detected brands
-        for (const brandName of detectedBrands) {
-          const brand = brandsData.find((b: any) => b.name.toLowerCase() === brandName)
+        // Save to product_availability for filtering
+        for (const productName of detectedProducts) {
+          const brand = brandsData.find((b: any) => b.name === productName)
           if (brand) {
             const products = await sql`SELECT id FROM brand_products WHERE brand_id = ${brand.id} LIMIT 1`
             if (products.length > 0) {
