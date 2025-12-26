@@ -139,19 +139,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create a job to track progress
-    const jobId = uuidv4()
-    await sql`
-      INSERT INTO "ScrapingJob" (id, source, status, city, "prospectsFound", "startedAt")
-      VALUES (${jobId}, 'google_places', 'analyzing_menus', ${city}, ${saved}, NOW())
-    `
-    
-    // Start menu analysis in background
-    if (venueIds.length > 0) {
-      Promise.resolve().then(() => analyzeVenueMenus(jobId, venueIds))
-    }
-
-    return NextResponse.json({ saved, analyzing: venueIds.length, jobId })
+    return NextResponse.json({ saved })
   } catch (error) {
     console.error('Error saving scrape:', error)
     return NextResponse.json({ error: 'Error saving' }, { status: 500 })
